@@ -92,7 +92,4 @@ public class BoidSimulation {
         return CompletableFuture.completedFuture(boidModel);
     }
 
-    public BoidModel getParams1() {
-        return boidModel;
-    }
 }

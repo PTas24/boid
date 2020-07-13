@@ -21,18 +21,17 @@ public class BoidWebSocketEndpoint extends Endpoint {
     public void onOpen(Session session, EndpointConfig endpointConfig) {
         this.session = session;
 
+        System.out.println("BoidWebSocketEndpoint onOpen");
         Runnable messageQueueTaker = () -> {
             while(!Thread.interrupted()) {
-                while (!messageQueue.isEmpty()) {
+                if (!messageQueue.isEmpty()) {
                     try {
                         session.getBasicRemote().sendObject(messageQueue.pop());
                     } catch (IOException | EncodeException e) {
                         LOGGER.log(Level.SEVERE, "Message sending failed", e);
                     }
                 }
-
             }
-
         };
 
         executor.execute(messageQueueTaker);
@@ -42,6 +41,7 @@ public class BoidWebSocketEndpoint extends Endpoint {
     public void onClose(final Session session, final CloseReason closeReason) {
         super.onClose(session, closeReason);
         LOGGER.info("Closing session " + session.getId());
+        executor.shutdown();
     }
 
 

@@ -9,9 +9,9 @@
         <version>2.0.1</version>
     </parent>
     <groupId>io.ogi.examples</groupId>
-    <artifactId>javaboids</artifactId>
+    <artifactId>helidon-boid</artifactId>
     <version>1.0-SNAPSHOT</version>
-    <name>myproject</name>
+    <name>helidon-boid</name>
 
     <properties>
         <mainClass>io.ogi.examples.Main</mainClass>

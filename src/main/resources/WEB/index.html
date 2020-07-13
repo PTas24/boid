@@ -1,18 +1,21 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="utf-8"/>
-    <title>Boids</title>
-    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
-<!--    <link rel="stylesheet" type="text/css" href="css/main.css">-->
-<!--    <script src="./boids.js"></script>-->
-    <style type="text/css">
+  <meta charset="utf-8"/>
+  <title>Boids</title>
+  <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+  <!--    <link rel="stylesheet" type="text/css" href="css/main.css">-->
+  <!--    <script src="./boids.js"></script>-->
+  <style type="text/css">
       body {
         margin: 20;
         background: #1cadc0;
         overflow: hidden;
       }
-    </style>
+
+
+
+  </style>
 </head>
 
 <body>
@@ -27,75 +30,118 @@
 
 
 <script>
-var canvasWidth = 200;
-var canvasHeight = 200;
-var canvasMargin = 10;
-var speedAdjust = 1;
-var numOfBoids = 200;
-var cohesionRange = 40;
-var separationRange = 10;
-var alignmentRange = 40;
-var cohesionFactor = 0.005;
-var separationFactor = 0.05;
-var alignmentFactor = 0.05;
-var speedLimit = 15;
+    var canvasWidth = 200;
+    var canvasHeight = 200;
+    var canvasMargin = 10;
+    var speedAdjust = 1;
+    var numOfBoids = 200;
+    var cohesionRange = 40;
+    var separationRange = 10;
+    var alignmentRange = 40;
+    var cohesionFactor = 0.005;
+    var separationFactor = 0.05;
+    var alignmentFactor = 0.05;
+    var speedLimit = 15;
 
-window.onload = () => {
-  // Make sure the canvas always fills the whole window
-  window.addEventListener("resize", sizeCanvas, false);
-  sizeCanvas();
-};
+    window.onload = () => {
+      // Make sure the canvas always fills the whole window
+      window.addEventListener("resize", sizeCanvas, false);
+      sizeCanvas();
+    };
 
-function flyBoid() {
-  var canvas = document.getElementById("boidCanvas");
-  var ctx = canvas.getContext("2d");
-  ctx.fillStyle = "#FF0000";
-<!--  ctx.fillRect(20, 20, 150, 100);-->
+    var websocket = new WebSocket("ws://localhost:8080/websocket/boid-positions");
+    console.log('websocket state: ', websocket.readyState);
+    websocket.onmessage = function (e) {
+        console.log(e.data);
+        onMessage(e.data)
+    }
 
-  fetch('http://localhost:8080/boid', {
-    method: 'post',
-    headers: {
-      "Content-type": "application/json; charset=UTF-8"
-    },
-    body:  '{"canvasWidth": ' + canvas.width + "," +
-     '"canvasHeight": ' + canvas.height + "," +
-     '"canvasMargin": ' + canvasMargin + "," +
-     '"speedAdjust": ' + speedAdjust + "," +
-     '"numOfBoids": ' + numOfBoids + "," +
-     '"cohesionRange": ' + cohesionRange + "," +
-     '"separationRange": ' + separationRange + "," +
-     '"alignmentRange": ' + alignmentRange + "," +
-     '"cohesionFactor": ' + cohesionFactor + "," +
-     '"separationFactor": ' + separationFactor + "," +
-     '"alignmentFactor": ' + alignmentFactor + "," +
-     '"speedLimit": ' + speedLimit +
-     '}'
-  })
-  .then(function (data) {
-    console.log('Request succeeded with JSON response', data);
-  })
-  .catch(function (error) {
-    console.log('Request failed', error);
-  });
+    function onMessage(data) {
+        clearTheCanvas();
+        drawBoids(data);
+    }
 
-}
+    function clearTheCanvas() {
+      var canvas = document.getElementById("boidCanvas");
+      var ctx = canvas.getContext("2d");
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
 
-function myFunction1() {
-  var canvas = document.getElementById("boidCanvas");
-  var ctx = canvas.getContext("2d");
-  ctx.fillStyle = "#FF0000";
-  ctx.fillRect(20, 20, 150, 100);
-}
+    function drawBoids(data) {
+      var ctx = document.getElementById("boidCanvas").getContext("2d");
+      var object = JSON.parse(data);
+      for (let boid of object.boids) {
+        drawEachBoid(ctx, boid);
+      }
+    }
 
-function sizeCanvas() {
-  const canvas = document.getElementById("boidCanvas");
-  canvas.width = window.innerWidth / 2;
-  canvas.height = window.innerHeight / 2;
-}
+    function drawEachBoid(ctx, boid) {
+      const angle = Math.atan2(boid.dy, boid.dx);
+      ctx.translate(boid.x, boid.y);
+      ctx.rotate(angle);
+      ctx.translate(-boid.x, -boid.y);
+      ctx.fillStyle = "#558cf4";
+      ctx.beginPath();
+      ctx.moveTo(boid.x, boid.y);
+      ctx.lineTo(boid.x - 15, boid.y + 5);
+      ctx.lineTo(boid.x - 15, boid.y - 5);
+      ctx.lineTo(boid.x, boid.y);
+      ctx.fill();
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+    }
 
-function initBoids() {
+    function flyBoid() {
+      var canvas = document.getElementById("boidCanvas");
+      var ctx = canvas.getContext("2d");
+      ctx.fillStyle = "#FF0000";
 
-}
+      fetch('http://localhost:8080/boid', {
+        method: 'post',
+        headers: {
+          "Content-type": "application/json; charset=UTF-8"
+        },
+        body:  '{"canvasWidth": ' + canvas.width + "," +
+         '"canvasHeight": ' + canvas.height + "," +
+         '"canvasMargin": ' + canvasMargin + "," +
+         '"speedAdjust": ' + speedAdjust + "," +
+         '"numOfBoids": ' + numOfBoids + "," +
+         '"cohesionRange": ' + cohesionRange + "," +
+         '"separationRange": ' + separationRange + "," +
+         '"alignmentRange": ' + alignmentRange + "," +
+         '"cohesionFactor": ' + cohesionFactor + "," +
+         '"separationFactor": ' + separationFactor + "," +
+         '"alignmentFactor": ' + alignmentFactor + "," +
+         '"speedLimit": ' + speedLimit +
+         '}'
+      })
+      .then(function (data) {
+        console.log('Request succeeded with JSON response', data);
+      })
+      .catch(function (error) {
+        console.log('Request failed', error);
+      });
+
+    }
+
+    function myFunction1() {
+      var canvas = document.getElementById("boidCanvas");
+      var ctx = canvas.getContext("2d");
+      ctx.fillStyle = "#FF0000";
+      ctx.fillRect(20, 20, 150, 100);
+    }
+
+    function sizeCanvas() {
+      const canvas = document.getElementById("boidCanvas");
+      canvas.width = window.innerWidth / 2;
+      canvas.height = window.innerHeight / 2;
+    }
+
+    function initBoids() {
+
+    }
+
+
+
 
 </script>
 

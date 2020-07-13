@@ -108,7 +108,7 @@ public final class Main {
                 .register("/greet", greetService)
                 .register("/boid", boidService)
                 .register("/websocket", TyrusSupport.builder().register(
-                        ServerEndpointConfig.Builder.create(BoidWebSocketEndpoint.class, "/positions")
+                        ServerEndpointConfig.Builder.create(BoidWebSocketEndpoint.class, "/boid-positions")
                                 .encoders(encoders)
                                 .build()).build())
 //                .register("/pictures", StaticContentSupport.create(Paths.get("/WEB/pics")))
