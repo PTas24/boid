@@ -1,0 +1,22 @@
+
+app:
+  greeting: "Hello"
+  canvas:
+    width: 200
+    height: 200
+    margin: 10
+  speedAdjust: 1
+  numOfBoids: 200
+  range:
+    cohesion: 40
+    separation: 10
+    alignment: 40
+  factor:
+    cohesion: 0.005
+    separation: 0.05
+    alignment: 0.05
+  speedLimit: 15
+
+server:
+  port: 8080
+  host: 0.0.0.0

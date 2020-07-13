@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <title>Boids</title>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+<!--    <link rel="stylesheet" type="text/css" href="css/main.css">-->
+<!--    <script src="./boids.js"></script>-->
+    <style type="text/css">
+      body {
+        margin: 20;
+        background: #1cadc0;
+        overflow: hidden;
+      }
+    </style>
+</head>
+
+<body>
+
+<h3>Boids</h3>
+
+<canvas id="boidCanvas" width="500" height="500" style="border:1px solid #d3d3d3;"></canvas>
+
+<p>Click the button to draw on the canvas.</p>
+
+<button onclick="flyBoid()">Fly it</button>
+
+
+<script>
+var canvasWidth = 200;
+var canvasHeight = 200;
+var canvasMargin = 10;
+var speedAdjust = 1;
+var numOfBoids = 200;
+var cohesionRange = 40;
+var separationRange = 10;
+var alignmentRange = 40;
+var cohesionFactor = 0.005;
+var separationFactor = 0.05;
+var alignmentFactor = 0.05;
+var speedLimit = 15;
+
+window.onload = () => {
+  // Make sure the canvas always fills the whole window
+  window.addEventListener("resize", sizeCanvas, false);
+  sizeCanvas();
+};
+
+function flyBoid() {
+  var canvas = document.getElementById("boidCanvas");
+  var ctx = canvas.getContext("2d");
+  ctx.fillStyle = "#FF0000";
+<!--  ctx.fillRect(20, 20, 150, 100);-->
+
+  fetch('http://localhost:8080/boid', {
+    method: 'post',
+    headers: {
+      "Content-type": "application/json; charset=UTF-8"
+    },
+    body:  '{"canvasWidth": ' + canvas.width + "," +
+     '"canvasHeight": ' + canvas.height + "," +
+     '"canvasMargin": ' + canvasMargin + "," +
+     '"speedAdjust": ' + speedAdjust + "," +
+     '"numOfBoids": ' + numOfBoids + "," +
+     '"cohesionRange": ' + cohesionRange + "," +
+     '"separationRange": ' + separationRange + "," +
+     '"alignmentRange": ' + alignmentRange + "," +
+     '"cohesionFactor": ' + cohesionFactor + "," +
+     '"separationFactor": ' + separationFactor + "," +
+     '"alignmentFactor": ' + alignmentFactor + "," +
+     '"speedLimit": ' + speedLimit +
+     '}'
+  })
+  .then(function (data) {
+    console.log('Request succeeded with JSON response', data);
+  })
+  .catch(function (error) {
+    console.log('Request failed', error);
+  });
+
+}
+
+function myFunction1() {
+  var canvas = document.getElementById("boidCanvas");
+  var ctx = canvas.getContext("2d");
+  ctx.fillStyle = "#FF0000";
+  ctx.fillRect(20, 20, 150, 100);
+}
+
+function sizeCanvas() {
+  const canvas = document.getElementById("boidCanvas");
+  canvas.width = window.innerWidth / 2;
+  canvas.height = window.innerHeight / 2;
+}
+
+function initBoids() {
+
+}
+
+</script>
+
+</body>
+</html>
