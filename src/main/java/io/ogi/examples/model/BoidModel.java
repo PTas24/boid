@@ -13,24 +13,9 @@ public class BoidModel {
     public double separationFactor;
     public double alignmentFactor;
     public int speedLimit;
+    public int simulationSpeed;
+    public int initialMaxSpeed;
 
-    @Override
-    public String toString() {
-        return "BoidModel{" +
-                "canvasWidth=" + canvasWidth +
-                ", canvasHeight=" + canvasHeight +
-                ", canvasMargin=" + canvasMargin +
-                ", speedAdjust=" + speedAdjust +
-                ", numOfBoids=" + numOfBoids +
-                ", cohesionRange=" + cohesionRange +
-                ", separationRange=" + separationRange +
-                ", alignmentRange=" + alignmentRange +
-                ", cohesionFactor=" + cohesionFactor +
-                ", separationFactor=" + separationFactor +
-                ", alignmentFactor=" + alignmentFactor +
-                ", speedLimit=" + speedLimit +
-                '}';
-    }
 
     public int getCanvasWidth() {
         return canvasWidth;
@@ -126,5 +111,41 @@ public class BoidModel {
 
     public void setSpeedLimit(int speedLimit) {
         this.speedLimit = speedLimit;
+    }
+
+    public int getSimulationSpeed() {
+        return simulationSpeed;
+    }
+
+    public void setSimulationSpeed(int simulationSpeed) {
+        this.simulationSpeed = simulationSpeed;
+    }
+
+    public int getInitialMaxSpeed() {
+        return initialMaxSpeed;
+    }
+
+    public void setInitialMaxSpeed(int initialMaxSpeed) {
+        this.initialMaxSpeed = initialMaxSpeed;
+    }
+
+    @Override
+    public String toString() {
+        return "BoidModel{" +
+                "canvasWidth=" + canvasWidth +
+                ", canvasHeight=" + canvasHeight +
+                ", canvasMargin=" + canvasMargin +
+                ", speedAdjust=" + speedAdjust +
+                ", numOfBoids=" + numOfBoids +
+                ", cohesionRange=" + cohesionRange +
+                ", separationRange=" + separationRange +
+                ", alignmentRange=" + alignmentRange +
+                ", cohesionFactor=" + cohesionFactor +
+                ", separationFactor=" + separationFactor +
+                ", alignmentFactor=" + alignmentFactor +
+                ", speedLimit=" + speedLimit +
+                ", simulationSpeed=" + simulationSpeed +
+                ", initialMaxSpeed=" + initialMaxSpeed +
+                '}';
     }
 }

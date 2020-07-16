@@ -32,15 +32,17 @@ public class BoidSimulationConfig {
         tmp.canvasMargin = canvasConfig.get("margin").asInt().orElse(10);
         tmp.speedAdjust = config.get("app.speedAdjust").asInt().orElse(1);
         tmp.numOfBoids = config.get("app.numOfBoids").asInt().orElse(200);
-        tmp.cohesionRange = rangeConfig.get("cohesion").asInt().orElse(40);
-        tmp.separationRange = rangeConfig.get("separation").asInt().orElse(10);
-        tmp.alignmentRange = rangeConfig.get("alignment").asInt().orElse(40);
+        tmp.cohesionRange = rangeConfig.get("cohesion").asInt().orElse(75);
+        tmp.separationRange = rangeConfig.get("separation").asInt().orElse(20);
+        tmp.alignmentRange = rangeConfig.get("alignment").asInt().orElse(75);
         tmp.cohesionFactor =   factorConfig.get("cohesion").asDouble().orElse(0.005);
         tmp.separationFactor = factorConfig.get("separation").asDouble().orElse(0.05);
         tmp.alignmentFactor =  factorConfig.get("alignment").asDouble().orElse(0.05);
         tmp.speedLimit = config.get("app.speedLimit").asInt().orElse(15);
+        tmp.simulationSpeed = config.get("app.simulationSpeed").asInt().orElse(5);
+        tmp.initialMaxSpeed = config.get("app.initialMaxSpeed").asInt().orElse(5);
         boidModel.set(tmp);
-        //System.out.println("init: " + boidModel);
+        System.out.println("init: " + boidModel);
     }
 
     public CompletionStage<BoidModel> getParams() {

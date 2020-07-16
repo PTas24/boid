@@ -1,14 +1,12 @@
 package io.ogi.examples.model;
 
-import io.ogi.examples.Boid;
-
 import java.util.List;
 
-public class BoidPosition {
+public class BoidPositions {
 
-    public List<Boid> boids;
+    private List<Boid> boids;
 
-    public BoidPosition() {
+    public BoidPositions() {
     }
 
     public List<Boid> getBoids() {
@@ -22,7 +20,7 @@ public class BoidPosition {
     @Override
     public String toString() {
         return "BoidPosition{" +
-                "boids=" + boids +
+                "boids=" + getBoids() +
                 '}';
     }
 }

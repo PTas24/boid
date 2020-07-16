@@ -1,21 +1,45 @@
 
 app:
   greeting: "Hello"
+  simulationSpeed: 5
   canvas:
     width: 1100
-    height: 500
+    height: 520
     margin: 10
+#  speedAdjust: 1
+#  numOfBoids: 50
+#  range:
+#    cohesion: 85
+#    separation: 20
+#    alignment: 85
+#  factor:
+#    cohesion: 0.01
+#    separation: 0.4
+#    alignment: 0.2
+#  speedLimit: 12
   speedAdjust: 1
-  numOfBoids: 200
+  numOfBoids: 50
   range:
-    cohesion: 40
-    separation: 10
-    alignment: 40
+    cohesion: 75
+    separation: 15
+    alignment: 75
   factor:
-    cohesion: 0.005
+    cohesion: 0.001
     separation: 0.05
-    alignment: 0.05
+    alignment: 0.12
   speedLimit: 15
+  initialMaxSpeed: 5
+#  speedAdjust: 1
+#  numOfBoids: 50
+#  range:
+#    cohesion: 75
+#    separation: 20
+#    alignment: 75
+#  factor:
+#    cohesion: 0.001
+#    separation: 0.25
+#    alignment: 0.12
+#  speedLimit: 15
 
 server:
   port: 8080

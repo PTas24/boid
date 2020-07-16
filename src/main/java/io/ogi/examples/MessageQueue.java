@@ -1,6 +1,6 @@
 package io.ogi.examples;
 
-import io.ogi.examples.model.BoidPosition;
+import io.ogi.examples.model.BoidPositions;
 
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -8,7 +8,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 public class MessageQueue {
     private static final MessageQueue INSTANCE = new MessageQueue();
 
-    private final Queue<BoidPosition> queue = new ConcurrentLinkedQueue<>();
+    private final Queue<BoidPositions> queue = new ConcurrentLinkedQueue<>();
 
     public static MessageQueue instance() {
         return INSTANCE;
@@ -17,12 +17,12 @@ public class MessageQueue {
     private MessageQueue() {
     }
 
-    public void push(BoidPosition s) {
+    public void push(BoidPositions s) {
         queue.add(s);
     }
 
 
-    public BoidPosition pop() {
+    public BoidPositions pop() {
 //        System.out.println(queue.peek());
         return queue.poll();
     }
@@ -32,7 +32,7 @@ public class MessageQueue {
     }
 
 
-    public BoidPosition peek() {
+    public BoidPositions peek() {
         return queue.peek();
     }
 }
