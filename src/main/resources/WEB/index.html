@@ -24,7 +24,7 @@
 
 <canvas id="boidCanvas" width="500" height="500" style="border:1px solid #d3d3d3;"></canvas>
 
-<p>Click the button to draw on the canvas.</p>
+<!--<p>Click the button to draw on the canvas.</p>-->
 
 <button onclick="flyBoid()">Fly it</button>
 
@@ -132,8 +132,8 @@
 
     function sizeCanvas() {
       const canvas = document.getElementById("boidCanvas");
-      canvas.width = window.innerWidth / 2;
-      canvas.height = window.innerHeight / 2;
+      canvas.width = window.innerWidth * 0.8;
+      canvas.height = window.innerHeight * 0.8;
     }
 
     function initBoids() {

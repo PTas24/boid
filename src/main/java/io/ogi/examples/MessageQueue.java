@@ -23,6 +23,7 @@ public class MessageQueue {
 
 
     public BoidPosition pop() {
+//        System.out.println(queue.peek());
         return queue.poll();
     }
 

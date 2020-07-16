@@ -18,4 +18,11 @@ public class BoidPosition {
     public void setBoids(List<Boid> boids) {
         this.boids = boids;
     }
+
+    @Override
+    public String toString() {
+        return "BoidPosition{" +
+                "boids=" + boids +
+                '}';
+    }
 }

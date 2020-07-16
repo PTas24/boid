@@ -25,19 +25,32 @@ public class Boid {
     }
 
     public void move(List<Boid> boids) {
+//        System.out.println("1 dx: " + dx);
+//        System.out.println("1 dy: " + dy);
         dx += flyTowardsCenterDx(getNeighbors(boids, boidModel.cohesionRange));
         dy += flyTowardsCenterDy(getNeighbors(boids, boidModel.cohesionRange));
+//        System.out.println("2 dx: " + dx);
+//        System.out.println("2 dy: " + dy);
         dx += avoidOthersDx(getNeighbors(boids, boidModel.separationRange));
         dy += avoidOthersDy(getNeighbors(boids, boidModel.separationRange));
+//        System.out.println("3 dx: " + dx);
+//        System.out.println("3 dy: " + dy);
         dx += matchVelocityDx(getNeighbors(boids, boidModel.alignmentRange));
         dy += matchVelocityDy(getNeighbors(boids, boidModel.alignmentRange));
+//        System.out.println("4 dx: " + dx);
+//        System.out.println("4 dy: " + dy);
         double speed = Math.sqrt(dx * dx + dy * dy);
         if (speed > boidModel.speedLimit) {
             dx = limitSpeedDx(speed);
             dy = limitSpeedDy(speed);
         }
+//        System.out.println("5 dx: " + dx);
+//        System.out.println("5 dy: " + dy);
         dx += keepWithinBoundsDx();
         dy += keepWithinBoundsDy();
+//        System.out.println("6 dx: " + dx);
+//        System.out.println("6 dy: " + dy);
+//        System.out.println("zzz");
     }
 
     private List<Boid> getNeighbors(List<Boid> boids, int range) {

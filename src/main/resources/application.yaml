@@ -2,8 +2,8 @@
 app:
   greeting: "Hello"
   canvas:
-    width: 200
-    height: 200
+    width: 1100
+    height: 500
     margin: 10
   speedAdjust: 1
   numOfBoids: 200

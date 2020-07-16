@@ -97,7 +97,10 @@ public final class Main {
 
         MetricsSupport metrics = MetricsSupport.create();
         GreetService greetService = new GreetService(config);
-        BoidService boidService = new BoidService(config);
+        BoidSimulationConfig boidSimulationConfig = new BoidSimulationConfig(config);
+        BoidService boidService = new BoidService(boidSimulationConfig);
+        BoidSimulation boidSimulation = new BoidSimulation(boidSimulationConfig);
+
         HealthSupport health = HealthSupport.builder()
                 .addLiveness(HealthChecks.healthChecks())   // Adds a convenient set of checks
                 .build();
@@ -110,6 +113,13 @@ public final class Main {
                 .register("/websocket", TyrusSupport.builder().register(
                         ServerEndpointConfig.Builder.create(BoidWebSocketEndpoint.class, "/boid-positions")
                                 .encoders(encoders)
+                                .configurator(new ServerEndpointConfig.Configurator() {
+                                    @Override
+                                    @SuppressWarnings("unchecked")
+                                    public <T> T getEndpointInstance(Class<T> endpointClass) {
+                                        return (T) new BoidWebSocketEndpoint(boidSimulation);
+                                    }
+                                })
                                 .build()).build())
 //                .register("/pictures", StaticContentSupport.create(Paths.get("/WEB/pics")))
                 .register("/", StaticContentSupport.builder("/WEB").welcomeFileName("index.html"))
