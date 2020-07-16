@@ -1,7 +1,7 @@
 
 app:
   greeting: "Hello"
-  simulationSpeed: 5
+  simulationSpeed: 20
   canvas:
     width: 1100
     height: 520
@@ -21,12 +21,12 @@ app:
   numOfBoids: 50
   range:
     cohesion: 75
-    separation: 15
+    separation: 20
     alignment: 75
   factor:
-    cohesion: 0.001
-    separation: 0.05
-    alignment: 0.12
+    cohesion: 0.01
+    separation: 0.035
+    alignment: 0.05
   speedLimit: 15
   initialMaxSpeed: 5
 #  speedAdjust: 1

@@ -41,6 +41,16 @@ public class BoidTransformation {
         if (boids.size() == 0) {
             return 0;
         }
+        int moveX = boids.stream()
+                .mapToInt(other -> (actualBoid.getX() - other.getX()))
+                .sum();
+        return moveX * separationFactor;
+    }
+
+    public static double keepdistanceDxSzar(Boid actualBoid, List<Boid> boids, double separationFactor) {
+        if (boids.size() == 0) {
+            return 0;
+        }
 //        double moveDx = boids.stream()
 //                .mapToDouble(Boid::getX)
 //                .reduce(0, (acc, next) -> acc - (next - actualBoid.getX()));
@@ -75,7 +85,8 @@ public class BoidTransformation {
             return 0;
         }
         double averageDx = boids.stream().mapToDouble(Boid::getDx).sum() / boids.size();
-        return (averageDx - actualBoid.getDx()) * alignmentFactor;
+//        return (averageDx - actualBoid.getDx()) * alignmentFactor;
+        return averageDx * alignmentFactor;
     }
 
     public static double matchVelocityDy(Boid actualBoid, List<Boid> boids, double alignmentFactor) {
@@ -83,7 +94,8 @@ public class BoidTransformation {
             return 0;
         }
         double averageDy = boids.stream().mapToDouble(Boid::getDy).sum() / boids.size();
-        return (averageDy - actualBoid.getDy()) * alignmentFactor;
+//        return (averageDy - actualBoid.getDy()) * alignmentFactor;
+        return averageDy * alignmentFactor;
     }
 
     public static double limitSpeedDx(Boid actualBoid, double speed, int speedLimit) {
