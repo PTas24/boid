@@ -5,7 +5,7 @@ app:
   canvas:
     width: 1100
     height: 520
-    margin: 10
+    margin: 30
 #  speedAdjust: 1
 #  numOfBoids: 50
 #  range:

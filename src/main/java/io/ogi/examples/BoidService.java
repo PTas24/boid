@@ -31,6 +31,7 @@ public class BoidService  implements Service {
         LOGGER.fine("startWithNewBoidParams");
 
         this.boidSimulationConfig.modifyBoidSimulation(boidModel)
+//                .thenApply()
                 .thenAccept(r -> serverResponse.status(201).send())
                 .exceptionally(serverResponse::send);
     }

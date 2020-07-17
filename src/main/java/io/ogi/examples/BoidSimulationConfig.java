@@ -52,6 +52,7 @@ public class BoidSimulationConfig {
     public CompletionStage<BoidModel> modifyBoidSimulation(BoidModel newBoidModel) {
         //System.out.println(newBoidModel);
         boidModel.set(newBoidModel);
+        System.out.println(getBoidModel());
         return CompletableFuture.completedFuture(boidModel.get());
     }
 
