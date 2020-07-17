@@ -108,9 +108,11 @@ public class BoidTransformation {
 
     public static int keepWithinBoundsDx(Boid actualBoid, int canvasWidth, int canvasMargin, int speedAdjust) {
         if (actualBoid.getX() < canvasMargin) {
+            System.out.println("x: " + actualBoid.getX());
             return speedAdjust;
         }
         if (actualBoid.getX() > (canvasWidth - canvasMargin)) {
+            System.out.println("x: " + actualBoid.getX());
             return -speedAdjust;
         }
         return 0;

@@ -82,10 +82,14 @@ public class BoidSimulation2 implements Runnable {
             movedBoid.setDx(BoidTransformation.limitSpeedDx(actualBoid, speed, boidModel.speedLimit));
             movedBoid.setDy(BoidTransformation.limitSpeedDy(actualBoid, speed, boidModel.speedLimit));
         }
-        movedBoid.setX((int)Math.round(movedBoid.getX() + movedBoid.getDx()));
-        movedBoid.setY((int)Math.round(movedBoid.getY() + movedBoid.getDy()));
+//        movedBoid.setX((int)Math.round(movedBoid.getX() + movedBoid.getDx()));
+//        movedBoid.setY((int)Math.round(movedBoid.getY() + movedBoid.getDy()));
 
-        keepWithinBounds(movedBoid);
+        movedBoid.setDx(movedBoid.getDx() + BoidTransformation.keepWithinBoundsDx(
+                movedBoid, boidModel.canvasWidth, boidModel.canvasMargin, boidModel.speedAdjust));
+        movedBoid.setDy(movedBoid.getDy() + BoidTransformation.keepWithinBoundsDy(
+                movedBoid, boidModel.canvasHeight, boidModel.canvasMargin, boidModel.speedAdjust));
+//        keepWithinBounds(movedBoid);
         movedBoid.setX((int)Math.round(movedBoid.getX() + movedBoid.getDx()));
         movedBoid.setY((int)Math.round(movedBoid.getY() + movedBoid.getDy()));
         return movedBoid;
@@ -94,9 +98,11 @@ public class BoidSimulation2 implements Runnable {
     private void keepWithinBounds(Boid movedBoid) {
         if (movedBoid.getX() <  boidModel.canvasMargin) {
             movedBoid.setDx(movedBoid.getDx() + boidModel.speedAdjust);
+            System.out.println("x: " + movedBoid.getX() + "dx: " + movedBoid.getDx());
         }
         if (movedBoid.getX() >  (boidModel.canvasWidth - boidModel.canvasMargin)) {
             movedBoid.setDx(movedBoid.getDx() - boidModel.speedAdjust);
+            System.out.println("x: " + movedBoid.getX() + "dx: " + movedBoid.getDx());
         }
         if (movedBoid.getY() <  boidModel.canvasMargin) {
             movedBoid.setDy(movedBoid.getDy() + boidModel.speedAdjust);
