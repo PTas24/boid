@@ -26,10 +26,15 @@
 
 <!--<p>Click the button to draw on the canvas.</p>-->
 
-<button onclick="flyBoid()">Fly it</button>
+<button onclick="flyBoid()">Fly</button>
 
 
 <script>
+    var wsUri = 'ws://localhost:8080/websocket/boid-positions';
+    var postUri = 'http://localhost:8080/boid';
+    var startSimulation = "start simulation";
+    var stopSimulation = "stop simulation";
+
     var canvasWidth = 200;
     var canvasHeight = 200;
     var canvasMargin = 10;
@@ -49,8 +54,9 @@
       sizeCanvas();
     };
 
-    var websocket = new WebSocket("ws://localhost:8080/websocket/boid-positions");
+    const websocket = new WebSocket('ws://localhost:8080/websocket/boid-positions');
     console.log('websocket state: ', websocket.readyState);
+
     websocket.onmessage = function (e) {
         console.log(e.data);
         onMessage(e.data)
@@ -95,7 +101,7 @@
       var ctx = canvas.getContext("2d");
       ctx.fillStyle = "#FF0000";
 
-      fetch('http://localhost:8080/boid', {
+      fetch(postUri, {
         method: 'post',
         headers: {
           "Content-type": "application/json; charset=UTF-8"
@@ -121,6 +127,9 @@
         console.log('Request failed', error);
       });
 
+      websocket.send(stopSimulation);
+      websocket.send(startSimulation);
+
     }
 
     function myFunction1() {
@@ -135,13 +144,6 @@
       canvas.width = window.innerWidth * 0.8;
       canvas.height = window.innerHeight * 0.8;
     }
-
-    function initBoids() {
-
-    }
-
-
-
 
 </script>
 

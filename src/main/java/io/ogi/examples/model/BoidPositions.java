@@ -1,5 +1,6 @@
 package io.ogi.examples.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class BoidPositions {
@@ -7,6 +8,7 @@ public class BoidPositions {
     private List<Boid> boids;
 
     public BoidPositions() {
+        boids = new ArrayList<>();
     }
 
     public List<Boid> getBoids() {

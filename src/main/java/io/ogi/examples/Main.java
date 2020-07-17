@@ -98,8 +98,8 @@ public final class Main {
         MetricsSupport metrics = MetricsSupport.create();
         GreetService greetService = new GreetService(config);
         BoidSimulationConfig boidSimulationConfig = new BoidSimulationConfig(config);
-        BoidService boidService = new BoidService(boidSimulationConfig);
         BoidSimulation boidSimulation = new BoidSimulation(boidSimulationConfig);
+        BoidService boidService = new BoidService(boidSimulationConfig, boidSimulation);
 
         HealthSupport health = HealthSupport.builder()
                 .addLiveness(HealthChecks.healthChecks())   // Adds a convenient set of checks

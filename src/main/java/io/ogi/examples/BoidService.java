@@ -8,10 +8,12 @@ import java.util.logging.Logger;
 public class BoidService  implements Service {
 
     private final BoidSimulationConfig boidSimulationConfig;
+    private final BoidSimulation boidSimulation;
     private static final Logger LOGGER = Logger.getLogger(BoidService.class.getName());
 
-    public BoidService(BoidSimulationConfig boidSimulationConfig) {
+    public BoidService(BoidSimulationConfig boidSimulationConfig, BoidSimulation boidSimulation) {
         this.boidSimulationConfig = boidSimulationConfig;
+        this.boidSimulation = boidSimulation;
     }
 
     @Override
@@ -31,7 +33,7 @@ public class BoidService  implements Service {
         LOGGER.fine("startWithNewBoidParams");
 
         this.boidSimulationConfig.modifyBoidSimulation(boidModel)
-//                .thenApply()
+                .thenApply(boidSimulation::initializeBoidsForNextFly)
                 .thenAccept(r -> serverResponse.status(201).send())
                 .exceptionally(serverResponse::send);
     }
