@@ -49,20 +49,14 @@ public final class Main {
      * @throws IOException if there are problems reading logging properties
      */
     static WebServer startServer() throws IOException {
-        // load logging configuration
         setupLogging();
 
-        // By default this will pick up application.yaml from the classpath
         Config config = Config.create();
 
-        JsonbSupport jsonbSupport = JsonbSupport.create();
-
-
-        // Build server with JSONP support
         WebServer server = WebServer.builder(createRouting(config))
                 .config(config.get("server"))
                 .addMediaSupport(JsonpSupport.create())
-                .addMediaSupport(jsonbSupport)
+                .addMediaSupport(JsonbSupport.create())
                 .build();
 
         // Try to start the server. If successful, print some info and arrange to
@@ -70,7 +64,9 @@ public final class Main {
         server.start()
                 .thenAccept(ws -> {
                     System.out.println(
-                            "WEB server is up! http://localhost:" + ws.port() + "/greet");
+                            "WEB server is up! http://localhost:" + ws.port() + "/boid");
+                    System.out.println(
+                            "http://localhost:" + ws.port() + "/index.html");
                     ws.whenShutdown().thenRun(()
                             -> System.out.println("WEB server is DOWN. Good bye!"));
                 })
@@ -79,8 +75,6 @@ public final class Main {
                     t.printStackTrace(System.err);
                     return null;
                 });
-
-        // Server threads are not daemon. No need to block. Just react.
 
         return server;
     }
@@ -99,7 +93,7 @@ public final class Main {
         GreetService greetService = new GreetService(config);
         BoidSimulationConfig boidSimulationConfig = new BoidSimulationConfig(config);
         BoidSimulation boidSimulation = new BoidSimulation(boidSimulationConfig);
-        BoidService boidService = new BoidService(boidSimulationConfig, boidSimulation);
+        BoidService boidService = new BoidService(boidSimulationConfig);
 
         HealthSupport health = HealthSupport.builder()
                 .addLiveness(HealthChecks.healthChecks())   // Adds a convenient set of checks

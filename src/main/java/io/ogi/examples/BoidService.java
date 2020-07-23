@@ -7,13 +7,11 @@ import java.util.logging.Logger;
 
 public class BoidService  implements Service {
 
-    private final BoidSimulationConfig boidSimulationConfig;
-    private final BoidSimulation boidSimulation;
     private static final Logger LOGGER = Logger.getLogger(BoidService.class.getName());
+    private final BoidSimulationConfig boidSimulationConfig;
 
-    public BoidService(BoidSimulationConfig boidSimulationConfig, BoidSimulation boidSimulation) {
+    public BoidService(BoidSimulationConfig boidSimulationConfig) {
         this.boidSimulationConfig = boidSimulationConfig;
-        this.boidSimulation = boidSimulation;
     }
 
     @Override
@@ -23,17 +21,16 @@ public class BoidService  implements Service {
     }
 
     private void getCurrentBoidParams(ServerRequest serverRequest, ServerResponse serverResponse) {
-        LOGGER.fine("getCurrentBoidParams");
+        LOGGER.info("getCurrentBoidParams");
         boidSimulationConfig.getParams()
                 .thenAccept(serverResponse::send)
                 .exceptionally(serverResponse::send);
     }
 
     private void startWithNewBoidParams(ServerRequest serverRequest, ServerResponse serverResponse, BoidModel boidModel) {
-        LOGGER.fine("startWithNewBoidParams");
+        LOGGER.info("startWithNewBoidParams");
 
         this.boidSimulationConfig.modifyBoidSimulation(boidModel)
-                .thenApply(boidSimulation::initializeBoidsForNextFly)
                 .thenAccept(r -> serverResponse.status(201).send())
                 .exceptionally(serverResponse::send);
     }

@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>Boids</title>
+  <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+  <!--    <link rel="stylesheet" type="text/css" href="css/main.css">-->
+  <!--    <script src="./boids.js"></script>-->
+  <style type="text/css">
+      body {
+        margin: 20;
+        background: #eef1f1;
+        overflow: hidden;
+      }
+  .slidecontainer {
+    width: 100%;
+  }
+
+  .slider {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 25px;
+    background: #d3d3d3;
+    outline: none;
+    opacity: 0.7;
+    -webkit-transition: .2s;
+    transition: opacity .2s;
+  }
+
+  .slider:hover {
+    opacity: 1;
+  }
+
+  .slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 25px;
+    height: 25px;
+    background: #558cf4;
+    cursor: pointer;
+  }
+
+  .slider::-moz-range-thumb {
+    width: 25px;
+    height: 25px;
+    background: #558cf4;
+    cursor: pointer;
+  }
+</style>
+
+</head>
+
+<body>
+
+<h3>Boids</h3>
+
+<canvas id="boidCanvas" width="500" height="500" style="border:1px solid #d3d3d3;"></canvas>
+
+<!--<p>Click the button to draw on the canvas.</p>-->
+
+<button onclick="flyBoid()">Start Flying</button>
+
+<div class="slidecontainer">
+  <input type="range" min="20" max="500" value="50" class="slider" id="numOfBoidsId">
+  <p>Value: <span id="numBoidsValue"></span></p>
+</div>
+
+
+<script>
+    var wsUri = 'ws://localhost:8080/websocket/boid-positions';
+    var postUri = 'http://localhost:8080/boid';
+    var startSimulation = "start simulation";
+    var stopSimulation = "stop simulation";
+
+    var canvasWidth = 200;
+    var canvasHeight = 200;
+    var canvasMargin = 10;
+    var speedAdjust = 1;
+    var numOfBoids = 10;
+    var cohesionRange = 40;
+    var separationRange = 10;
+    var alignmentRange = 40;
+    var cohesionFactor = 0.005;
+    var separationFactor = 0.05;
+    var alignmentFactor = 0.05;
+    var speedLimit = 15;
+
+    var numOfB = document.getElementById("numOfBoidsId");
+    var output = document.getElementById("numBoidsValue");
+    output.innerHTML = numOfB.value;
+
+    numOfB.oninput = function() {
+      output.innerHTML = this.value;
+    }
+
+    window.onload = () => {
+      // Make sure the canvas always fills the whole window
+      window.addEventListener("resize", sizeCanvas, false);
+      sizeCanvas();
+    };
+
+    const websocket = new WebSocket('ws://localhost:8080/websocket/boid-positions');
+    console.log('websocket state: ', websocket.readyState);
+
+    websocket.onmessage = function (e) {
+        console.log(e.data);
+        onMessage(e.data)
+    }
+
+    function onMessage(data) {
+        clearTheCanvas();
+        drawBoids(data);
+    }
+
+    function clearTheCanvas() {
+      var canvas = document.getElementById("boidCanvas");
+      var ctx = canvas.getContext("2d");
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    function drawBoids(data) {
+      var ctx = document.getElementById("boidCanvas").getContext("2d");
+      var object = JSON.parse(data);
+      for (let boid of object.boids) {
+        drawEachBoid(ctx, boid);
+      }
+    }
+
+    function drawEachBoid(ctx, boid) {
+      const angle = Math.atan2(boid.dy, boid.dx);
+      ctx.translate(boid.x, boid.y);
+      ctx.rotate(angle);
+      ctx.translate(-boid.x, -boid.y);
+      ctx.fillStyle = "#558cf4";
+      ctx.beginPath();
+      ctx.moveTo(boid.x, boid.y);
+      ctx.lineTo(boid.x - 15, boid.y + 5);
+      ctx.lineTo(boid.x - 15, boid.y - 5);
+      ctx.lineTo(boid.x, boid.y);
+      ctx.fill();
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+    }
+
+    function flyBoid() {
+      var canvas = document.getElementById("boidCanvas");
+      var ctx = canvas.getContext("2d");
+      ctx.fillStyle = "#FF0000";
+
+      fetch(postUri, {
+        method: 'post',
+        headers: {
+          "Content-type": "application/json; charset=UTF-8"
+        },
+        body:  '{"canvasWidth": ' + canvas.width + "," +
+         '"canvasHeight": ' + canvas.height + "," +
+         '"canvasMargin": ' + canvasMargin + "," +
+         '"speedAdjust": ' + speedAdjust + "," +
+         '"numOfBoids": ' + numOfBoids + "," +
+         '"cohesionRange": ' + cohesionRange + "," +
+         '"separationRange": ' + separationRange + "," +
+         '"alignmentRange": ' + alignmentRange + "," +
+         '"cohesionFactor": ' + cohesionFactor + "," +
+         '"separationFactor": ' + separationFactor + "," +
+         '"alignmentFactor": ' + alignmentFactor + "," +
+         '"speedLimit": ' + speedLimit +
+         '}'
+      })
+      .then(function (data) {
+        console.log('Request succeeded with JSON response', data);
+      })
+      .catch(function (error) {
+        console.log('Request failed', error);
+      });
+
+      websocket.send(stopSimulation);
+      websocket.send(startSimulation);
+
+    }
+
+    function myFunction1() {
+      var canvas = document.getElementById("boidCanvas");
+      var ctx = canvas.getContext("2d");
+      ctx.fillStyle = "#FF0000";
+      ctx.fillRect(20, 20, 150, 100);
+    }
+
+    function sizeCanvas() {
+      const canvas = document.getElementById("boidCanvas");
+      canvas.width = window.innerWidth * 0.8;
+      canvas.height = window.innerHeight * 0.8;
+    }
+
+</script>
+
+</body>
+</html>

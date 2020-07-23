@@ -17,10 +17,10 @@ public class Boid {
     }
 
     public Boid(BoidModel boidModel) {
-        this.x = (int)(Math.random()*((boidModel.canvasWidth)+1));
-        this.y = (int)(Math.random()*((boidModel.canvasHeight)+1));
-        this.dx = Math.random()*(boidModel.initialMaxSpeed * 2 +1)- boidModel.initialMaxSpeed;
-        this.dy = Math.random()*(boidModel.initialMaxSpeed * 2 +1)- boidModel.initialMaxSpeed;
+        this.x = (int)(Math.random()*((boidModel.getCanvasWidth())+1));
+        this.y = (int)(Math.random()*((boidModel.getCanvasHeight())+1));
+        this.dx = Math.random()*(boidModel.getInitialMaxSpeed() * 2 +1)- boidModel.getInitialMaxSpeed();
+        this.dy = Math.random()*(boidModel.getInitialMaxSpeed() * 2 +1)- boidModel.getInitialMaxSpeed();
     }
 
     public Boid(int x, int y, double dx, double dy) {

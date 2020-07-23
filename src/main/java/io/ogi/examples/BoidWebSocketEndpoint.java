@@ -38,7 +38,7 @@ public class BoidWebSocketEndpoint extends Endpoint {
                             .get();
 
                     boidSimulation.initializeBoids();
-                    scheduledExecutorService.scheduleAtFixedRate(boidSimulation, 5,boidSimulation.getBoidModel().simulationSpeed, TimeUnit.MILLISECONDS);
+                    scheduledExecutorService.scheduleAtFixedRate(boidSimulation, 5, boidSimulation.getBoidModel().getSimulationSpeed(), TimeUnit.MILLISECONDS);
                 }
                 if (message.equalsIgnoreCase(STOP)) {
                     LOGGER.info("stop message");
@@ -51,7 +51,7 @@ public class BoidWebSocketEndpoint extends Endpoint {
         executor = ThreadPoolSupplier.builder()
                 .threadNamePrefix("boid-message-queue-taker-thread")
                 .corePoolSize(1)
-                .daemon(true)
+                .daemon(false)
                 .build()
                 .get();
 

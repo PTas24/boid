@@ -5,7 +5,7 @@ import io.ogi.examples.model.BoidModel;
 import io.ogi.examples.model.BoidPositions;
 
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -13,9 +13,11 @@ public class BoidSimulation implements Runnable {
 
     private final MessageQueue messageQueue = MessageQueue.instance();
     private final BoidPositions boidPositions;
-    private final BoidModel boidModel;
+    private final BoidSimulationConfig boidSimulationConfig;
+    private BoidModel boidModel;
 
     public BoidSimulation(BoidSimulationConfig boidSimulationConfig) {
+        this.boidSimulationConfig = boidSimulationConfig;
         this.boidPositions = new BoidPositions();
         this.boidModel = boidSimulationConfig.getBoidModel();
         initializeBoids();
@@ -23,7 +25,8 @@ public class BoidSimulation implements Runnable {
     }
 
     public void initializeBoids() {
-        boidPositions.setBoids(Stream.generate(() -> new Boid(boidModel)).limit(boidModel.numOfBoids).collect(Collectors.toList()));
+        boidModel = boidSimulationConfig.getBoidModel();
+        boidPositions.setBoids(Stream.generate(() -> new Boid(boidModel)).limit(boidModel.getNumOfBoids()).collect(Collectors.toList()));
     }
 
     void setBoidPositions(List<Boid> boids) {
@@ -52,38 +55,38 @@ public class BoidSimulation implements Runnable {
 
         double vx1 = BoidTransformation.flyTowardsCenterDx(
                 actualBoid,
-                BoidTransformation.getNeighbors(actualBoid, boids, boidModel.cohesionRange),
-                boidModel.cohesionFactor);
+                BoidTransformation.getNeighbors(actualBoid, boids, boidModel.getCohesionRange()),
+                boidModel.getCohesionFactor());
         double vy1 = BoidTransformation.flyTowardsCenterDy(
                 actualBoid,
-                BoidTransformation.getNeighbors(actualBoid, boids, boidModel.cohesionRange),
-                boidModel.cohesionFactor);
+                BoidTransformation.getNeighbors(actualBoid, boids, boidModel.getCohesionRange()),
+                boidModel.getCohesionFactor());
 
         double vx2 = BoidTransformation.keepdistanceDx(
                 actualBoid,
-                BoidTransformation.getNeighbors(actualBoid, boids, boidModel.separationRange),
-                boidModel.separationFactor);
+                BoidTransformation.getNeighbors(actualBoid, boids, boidModel.getSeparationRange()),
+                boidModel.getSeparationFactor());
         double vy2 =  BoidTransformation.keepDistanceDy(
                 actualBoid,
-                BoidTransformation.getNeighbors(actualBoid, boids, boidModel.separationRange),
-                boidModel.separationFactor);
+                BoidTransformation.getNeighbors(actualBoid, boids, boidModel.getSeparationRange()),
+                boidModel.getSeparationFactor());
 //        vx2 = 0; vy2 = 0;
 
         double vx3 =  BoidTransformation.matchVelocityDx(
                 actualBoid,
-                BoidTransformation.getNeighbors(actualBoid, boids, boidModel.alignmentRange),
-                boidModel.alignmentFactor);
+                BoidTransformation.getNeighbors(actualBoid, boids, boidModel.getAlignmentRange()),
+                boidModel.getAlignmentFactor());
         double vy3 = BoidTransformation.matchVelocityDy(
                 actualBoid,
-                BoidTransformation.getNeighbors(actualBoid, boids, boidModel.alignmentRange),
-                boidModel.alignmentFactor);
+                BoidTransformation.getNeighbors(actualBoid, boids, boidModel.getAlignmentRange()),
+                boidModel.getAlignmentFactor());
 
         movedBoid.setDx(movedBoid.getDx() + vx1 + vx2 + vx3);
         movedBoid.setDy(movedBoid.getDy() + vy1 + vy2 + vy3);
         double speed = Math.sqrt(movedBoid.getDx() * movedBoid.getDx() + movedBoid.getDy() * movedBoid.getDy());
-        if (speed > boidModel.speedLimit) {
-            movedBoid.setDx(BoidTransformation.limitSpeedDx(actualBoid, speed, boidModel.speedLimit));
-            movedBoid.setDy(BoidTransformation.limitSpeedDy(actualBoid, speed, boidModel.speedLimit));
+        if (speed > boidModel.getSpeedLimit()) {
+            movedBoid.setDx(BoidTransformation.limitSpeedDx(actualBoid, speed, boidModel.getSpeedLimit()));
+            movedBoid.setDy(BoidTransformation.limitSpeedDy(actualBoid, speed, boidModel.getSpeedLimit()));
         }
 
 //        movedBoid.setX((int)Math.round(movedBoid.getX() + movedBoid.getDx()));
@@ -97,37 +100,27 @@ public class BoidSimulation implements Runnable {
     }
 
     private void keepWithinBounds(Boid movedBoid) {
-        if (movedBoid.getX() <  boidModel.canvasMargin) {
-            movedBoid.setDx(movedBoid.getDx() + boidModel.speedAdjust);
+        if (movedBoid.getX() < boidModel.getCanvasMargin()) {
+            movedBoid.setDx(movedBoid.getDx() + boidModel.getSpeedAdjust());
         }
-        if (movedBoid.getX() >  (boidModel.canvasWidth - boidModel.canvasMargin)) {
-            movedBoid.setDx(movedBoid.getDx() - boidModel.speedAdjust);
+        if (movedBoid.getX() >  (boidModel.getCanvasWidth() - boidModel.getCanvasMargin())) {
+            movedBoid.setDx(movedBoid.getDx() - boidModel.getSpeedAdjust());
         }
-        if (movedBoid.getY() <  boidModel.canvasMargin) {
-            movedBoid.setDy(movedBoid.getDy() + boidModel.speedAdjust);
+        if (movedBoid.getY() < boidModel.getCanvasMargin()) {
+            movedBoid.setDy(movedBoid.getDy() + boidModel.getSpeedAdjust());
         }
-        if (movedBoid.getY() >  (boidModel.canvasHeight - boidModel.canvasMargin)) {
-            movedBoid.setDy(movedBoid.getDy() - boidModel.speedAdjust);
+        if (movedBoid.getY() >  (boidModel.getCanvasHeight() - boidModel.getCanvasMargin())) {
+            movedBoid.setDy(movedBoid.getDy() - boidModel.getSpeedAdjust());
         }
     }
 
     private void drawTheBoids() {
-//        if (boidPositions == null) {
-//            return;
-//        }
         messageQueue.push(boidPositions);
     }
-
 
     @Override
     public void run() {
         moveTheBoids();
         drawTheBoids();
-    }
-
-    public CompletableFuture<Void> initializeBoidsForNextFly(BoidModel boidModel) {
-        initializeBoids();
-//        System.out.println("we are here");
-        return new CompletableFuture<>();
     }
 }

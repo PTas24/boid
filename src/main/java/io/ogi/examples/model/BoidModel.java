@@ -1,20 +1,20 @@
 package io.ogi.examples.model;
 
 public class BoidModel {
-    public int canvasWidth;
-    public int canvasHeight;
-    public int canvasMargin;
-    public int speedAdjust;
-    public int numOfBoids;
-    public int cohesionRange;
-    public int separationRange;
-    public int alignmentRange;
-    public double cohesionFactor;
-    public double separationFactor;
-    public double alignmentFactor;
-    public int speedLimit;
-    public int simulationSpeed;
-    public int initialMaxSpeed;
+    private int canvasWidth;
+    private int canvasHeight;
+    private int canvasMargin;
+    private int speedAdjust;
+    private int numOfBoids;
+    private int cohesionRange;
+    private int separationRange;
+    private int alignmentRange;
+    private double cohesionFactor;
+    private double separationFactor;
+    private double alignmentFactor;
+    private int speedLimit;
+    private int simulationSpeed;
+    private int initialMaxSpeed;
 
 
     public int getCanvasWidth() {
