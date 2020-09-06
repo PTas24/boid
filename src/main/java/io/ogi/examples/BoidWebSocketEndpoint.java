@@ -25,25 +25,32 @@ public class BoidWebSocketEndpoint extends Endpoint {
     public void onOpen(Session session, EndpointConfig endpointConfig) {
         LOGGER.info("Opening session " + session.getId());
         MessageQueueTaker messageQueueTaker = new MessageQueueTaker(session);
-        session.addMessageHandler((MessageHandler.Whole<String>) message -> {
-            if (message.equalsIgnoreCase(START)) {
-                LOGGER.info("start message");
-                scheduledExecutorService = ScheduledThreadPoolSupplier.builder()
-                        .threadNamePrefix("boid-simulation-thread")
-                        .corePoolSize(1)
-                        .daemon(true)
-                        .build()
-                        .get();
+        session.addMessageHandler(new MessageHandler.Whole<String> () {
+              @Override
+              public void onMessage(String message) {
+                  if (message.equalsIgnoreCase(START)) {
+                      LOGGER.info("start message");
+                      scheduledExecutorService = ScheduledThreadPoolSupplier.builder()
+                              .threadNamePrefix("boid-simulation-thread")
+                              .corePoolSize(1)
+                              .daemon(true)
+                              .build()
+                              .get();
 
-                boidSimulation.initializeBoids();
-                scheduledExecutorService.scheduleAtFixedRate(boidSimulation, 5, boidSimulation.getBoidModel().getSimulationSpeed(), TimeUnit.MILLISECONDS);
-            }
-            if (message.equalsIgnoreCase(STOP)) {
-                LOGGER.info("stop message");
-                scheduledExecutorService.shutdownNow();
-            }
-            LOGGER.info(() -> "Received message:"+ message + ":");
-        });
+                      boidSimulation.initializeBoids();
+                      scheduledExecutorService.scheduleAtFixedRate(
+                              boidSimulation,
+                              5,
+                              boidSimulation.getBoidModel().getSimulationSpeed(),
+                              TimeUnit.MILLISECONDS);
+                  }
+                  if (message.equalsIgnoreCase(STOP)) {
+                      LOGGER.info("stop message");
+                      scheduledExecutorService.shutdownNow();
+                  }
+                  LOGGER.info(() -> "Received message:" + message + ":");
+              }
+          });
 
         executor = ThreadPoolSupplier.builder()
                 .threadNamePrefix("boid-message-queue-taker-thread")

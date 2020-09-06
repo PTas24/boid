@@ -184,6 +184,7 @@ function refreshConfig() {
 }
 
 function flyBoid() {
+  console.log('stop/start simulation');
   websocket.send(stopSimulation);
   websocket.send(startSimulation);
 }
