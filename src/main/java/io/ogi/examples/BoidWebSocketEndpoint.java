@@ -25,6 +25,7 @@ public class BoidWebSocketEndpoint extends Endpoint {
     public void onOpen(Session session, EndpointConfig endpointConfig) {
         LOGGER.info("Opening session " + session.getId());
         MessageQueueTaker messageQueueTaker = new MessageQueueTaker(session);
+<<<<<<< HEAD
         session.addMessageHandler(new MessageHandler.Whole<String> () {
               @Override
               public void onMessage(String message) {
@@ -51,6 +52,58 @@ public class BoidWebSocketEndpoint extends Endpoint {
                   LOGGER.info(() -> "Received message:" + message + ":");
               }
           });
+=======
+
+        session.addMessageHandler(String.class, message -> {
+            if (message.equalsIgnoreCase(START)) {
+                LOGGER.info("start message");
+                scheduledExecutorService = ScheduledThreadPoolSupplier.builder()
+                        .threadNamePrefix("boid-simulation-thread")
+                        .corePoolSize(1)
+                        .daemon(true)
+                        .build()
+                        .get();
+
+                boidSimulation.initializeBoids();
+                scheduledExecutorService.scheduleAtFixedRate(
+                        boidSimulation,
+                        5,
+                        boidSimulation.getBoidModel().getSimulationSpeed(),
+                        TimeUnit.MILLISECONDS);
+            }
+            if (message.equalsIgnoreCase(STOP)) {
+                LOGGER.info("stop message");
+                scheduledExecutorService.shutdownNow();
+            }
+            LOGGER.info(() -> "Received message:" + message + ":");
+        });
+//        session.addMessageHandler(new MessageHandler.Whole<String> () {
+//            @Override
+//            public void onMessage(String message) {
+//                if (message.equalsIgnoreCase(START)) {
+//                    LOGGER.info("start message");
+//                    scheduledExecutorService = ScheduledThreadPoolSupplier.builder()
+//                            .threadNamePrefix("boid-simulation-thread")
+//                            .corePoolSize(1)
+//                            .daemon(true)
+//                            .build()
+//                            .get();
+//
+//                    boidSimulation.initializeBoids();
+//                    scheduledExecutorService.scheduleAtFixedRate(
+//                            boidSimulation,
+//                            5,
+//                            boidSimulation.getBoidModel().getSimulationSpeed(),
+//                            TimeUnit.MILLISECONDS);
+//                }
+//                if (message.equalsIgnoreCase(STOP)) {
+//                    LOGGER.info("stop message");
+//                    scheduledExecutorService.shutdownNow();
+//                }
+//                LOGGER.info(() -> "Received message:" + message + ":");
+//            }
+//        });
+>>>>>>> 043b21f... MessageHandler bugfix
 
         executor = ThreadPoolSupplier.builder()
                 .threadNamePrefix("boid-message-queue-taker-thread")
