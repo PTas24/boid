@@ -5,12 +5,13 @@ import io.ogi.examples.model.BoidModel;
 import io.ogi.examples.model.BoidPositions;
 
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class BoidSimulation implements Runnable {
 
+    private static final Logger LOGGER = Logger.getLogger(BoidSimulation.class.getName());
     private final MessageQueue messageQueue = MessageQueue.instance();
     private final BoidPositions boidPositions;
     private final BoidSimulationConfig boidSimulationConfig;
@@ -26,6 +27,7 @@ public class BoidSimulation implements Runnable {
 
     public void initializeBoids() {
         boidModel = boidSimulationConfig.getBoidModel();
+        LOGGER.info(() -> "model: " + boidModel);
         boidPositions.setBoids(Stream.generate(() -> new Boid(boidModel)).limit(boidModel.getNumOfBoids()).collect(Collectors.toList()));
     }
 

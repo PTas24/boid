@@ -4,6 +4,25 @@ body {
     overflow: hidden;
 }
 
+.flex-container {
+  display: flex;
+  background-color: #777799;
+}
+
+.flex-container > div {
+  background-color: #a5c5c9;
+  margin: 10px;
+  padding: 20px;
+  font-size: 30px;
+}
+
+.box {
+    display: flex;
+    width: 100%;
+    flex-direction: column;
+    scroll-padding-left: 30px;
+}
+
 .slidecontainer {
     width: 100%;
 }
@@ -28,12 +47,12 @@ body {
     appearance: none;
     width: 25px;
     height: 25px;
-    background: #558cf4;
+    background: #2c2d30;
     cursor: pointer;
 }
 
 .slider::-moz-range-thumb {
-    width: 25px;
+    /* width: 25px; */
     height: 25px;
     background: #558cf4;
     cursor: pointer;

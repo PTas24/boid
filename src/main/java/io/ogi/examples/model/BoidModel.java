@@ -131,21 +131,21 @@ public class BoidModel {
 
     @Override
     public String toString() {
-        return "BoidModel{" +
+        return "BoidModel{\n" +
                 "canvasWidth=" + canvasWidth +
-                ", canvasHeight=" + canvasHeight +
-                ", canvasMargin=" + canvasMargin +
-                ", speedAdjust=" + speedAdjust +
-                ", numOfBoids=" + numOfBoids +
-                ", cohesionRange=" + cohesionRange +
-                ", separationRange=" + separationRange +
-                ", alignmentRange=" + alignmentRange +
-                ", cohesionFactor=" + cohesionFactor +
-                ", separationFactor=" + separationFactor +
-                ", alignmentFactor=" + alignmentFactor +
-                ", speedLimit=" + speedLimit +
-                ", simulationSpeed=" + simulationSpeed +
-                ", initialMaxSpeed=" + initialMaxSpeed +
+                ", \ncanvasHeight=" + canvasHeight +
+                ", \ncanvasMargin=" + canvasMargin +
+                ", \nspeedAdjust=" + speedAdjust +
+                ", \nnumOfBoids=" + numOfBoids +
+                ", \ncohesionRange=" + cohesionRange +
+                ", \nseparationRange=" + separationRange +
+                ", \nalignmentRange=" + alignmentRange +
+                ", \ncohesionFactor=" + cohesionFactor +
+                ", \nseparationFactor=" + separationFactor +
+                ", \nalignmentFactor=" + alignmentFactor +
+                ", \nspeedLimit=" + speedLimit +
+                ", \nsimulationSpeed=" + simulationSpeed +
+                ", \ninitialMaxSpeed=" + initialMaxSpeed +
                 '}';
     }
 }

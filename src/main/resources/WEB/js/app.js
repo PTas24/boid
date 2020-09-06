@@ -5,13 +5,13 @@ var stopSimulation = "stop simulation";
 
 var canvasWidth = 200;
 var canvasHeight = 200;
-var canvasMargin = 10;
+var canvasMargin = 50;
 var speedAdjust = 1;
 var numOfBoids = 75;
-var cohesionRange = 200;
+var cohesionRange = 175;
 var separationRange = 20;
-var alignmentRange = 100;
-var cohesionFactor = 0.1;
+var alignmentRange = 75;
+var cohesionFactor = 0.01;
 var separationFactor = 0.035;
 var alignmentFactor = 0.125;
 var speedLimit = 12;
@@ -19,11 +19,83 @@ var simulationSpeed = 30;
 var initialMaxSpeed = 4;
 
 var numOfB = document.getElementById("numOfBoidsId");
-var output = document.getElementById("numBoidsValue");
-output.innerHTML = numOfB.value;
+var numBoidsValue = document.getElementById("numBoidsValue");
+numBoidsValue.innerHTML = numOfB.value;
 
-numOfB.oninput = function() {
-  output.innerHTML = this.value;
+numOfB.oninput = function () {
+  numBoidsValue.innerHTML = this.value;
+}
+
+var cohesionRangeId = document.getElementById("cohesionRangeId");
+var cohesionRangeValue = document.getElementById("cohesionRangeValue");
+cohesionRangeValue.innerHTML = cohesionRangeId.value;
+
+cohesionRangeId.oninput = function () {
+  cohesionRangeValue.innerHTML = this.value;
+}
+
+var separationRangeId = document.getElementById("separationRangeId");
+var separationRangeValue = document.getElementById("separationRangeValue");
+separationRangeValue.innerHTML = separationRangeId.value;
+
+separationRangeId.oninput = function () {
+  separationRangeValue.innerHTML = this.value;
+}
+
+var alignmentRangeId = document.getElementById("alignmentRangeId");
+var alignmentRangeValue = document.getElementById("alignmentRangeValue");
+alignmentRangeValue.innerHTML = alignmentRangeId.value;
+
+alignmentRangeId.oninput = function () {
+  alignmentRangeValue.innerHTML = this.value;
+}
+
+var cohesionFactorId = document.getElementById("cohesionFactorId");
+var cohesionFactorValue = document.getElementById("cohesionFactorValue");
+cohesionFactorValue.innerHTML = cohesionFactorId.value;
+
+cohesionFactorId.oninput = function () {
+  cohesionFactorValue.innerHTML = this.value;
+}
+
+var separationFactorId = document.getElementById("separationFactorId");
+var separationFactorValue = document.getElementById("separationFactorValue");
+separationFactorValue.innerHTML = separationFactorId.value;
+
+separationFactorId.oninput = function () {
+  separationFactorValue.innerHTML = this.value;
+}
+
+var alignmentFactorId = document.getElementById("alignmentFactorId");
+var alignmentFactorValue = document.getElementById("alignmentFactorValue");
+alignmentFactorValue.innerHTML = alignmentFactorId.value;
+
+alignmentFactorId.oninput = function () {
+  alignmentFactorValue.innerHTML = this.value;
+}
+
+var speedLimitId = document.getElementById("speedLimitId");
+var speedLimitValue = document.getElementById("speedLimitValue");
+speedLimitValue.innerHTML = speedLimitId.value;
+
+speedLimitId.oninput = function () {
+  speedLimitValue.innerHTML = this.value;
+}
+
+var simulationSpeedId = document.getElementById("simulationSpeedId");
+var simulationSpeedValue = document.getElementById("simulationSpeedValue");
+simulationSpeedValue.innerHTML = simulationSpeedId.value;
+
+simulationSpeedId.oninput = function () {
+  simulationSpeedValue.innerHTML = this.value;
+}
+
+var initialMaxSpeedId = document.getElementById("initialMaxSpeedId");
+var initialMaxSpeedValue = document.getElementById("initialMaxSpeedValue");
+initialMaxSpeedValue.innerHTML = initialMaxSpeedId.value;
+
+initialMaxSpeedId.oninput = function () {
+  initialMaxSpeedValue.innerHTML = this.value;
 }
 
 window.onload = () => {
@@ -36,7 +108,7 @@ const websocket = new WebSocket('ws://localhost:8080/websocket/boid-positions');
 console.log('websocket state: ', websocket.readyState);
 
 websocket.onmessage = function (e) {
-    console.log(e.data);
+    // console.log(e.data);
     onMessage(e.data)
 }
 
@@ -74,17 +146,34 @@ function drawEachBoid(ctx, boid) {
   ctx.setTransform(1, 0, 0, 1, 0, 0);
 }
 
-function flyBoid() {
+function refreshConfig() {
   var canvas = document.getElementById("boidCanvas");
   var ctx = canvas.getContext("2d");
   ctx.fillStyle = "#FF0000";
+
+  var bodyJson = `{"canvasWidth": ${canvas.width},
+        "canvasHeight": ${canvas.height},
+        "canvasMargin": ${canvasMargin},
+        "speedAdjust": ${speedAdjust},
+        "numOfBoids": ${numOfBoidsId.value},
+        "cohesionRange": ${cohesionRangeId.value},
+        "separationRange": ${separationRangeId.value},
+        "alignmentRange": ${alignmentRangeId.value},
+        "cohesionFactor": ${cohesionFactorId.value},
+        "separationFactor": ${separationFactorId.value},
+        "alignmentFactor": ${alignmentFactorId.value},
+        "speedLimit": ${speedLimitId.value},
+        "simulationSpeed": ${simulationSpeedId.value},
+        "initialMaxSpeed": ${initialMaxSpeedId.value}}`;
+
+  console.log("post body json: ", bodyJson)
 
   fetch(postUri, {
     method: 'post',
     headers: {
       "Content-type": "application/json; charset=UTF-8"
     },
-    body:  `{"canvasWidth": ${canvas.width},"canvasHeight": ${canvas.height},"canvasMargin": ${canvasMargin},"speedAdjust": ${speedAdjust},"numOfBoids": ${numOfBoids},"cohesionRange": ${cohesionRange},"separationRange": ${separationRange},"alignmentRange": ${alignmentRange},"cohesionFactor": ${cohesionFactor},"separationFactor": ${separationFactor},"alignmentFactor": ${alignmentFactor},"speedLimit": ${speedLimit}, "simulationSpeed": ${simulationSpeed}, "initialMaxSpeed": ${initialMaxSpeed}}`
+    body: bodyJson
   })
   .then(function (data) {
     console.log('Request succeeded with JSON response', data);
@@ -92,10 +181,11 @@ function flyBoid() {
   .catch(function (error) {
     console.log('Request failed', error);
   });
+}
 
+function flyBoid() {
   websocket.send(stopSimulation);
   websocket.send(startSimulation);
-
 }
 
 function myFunction1() {

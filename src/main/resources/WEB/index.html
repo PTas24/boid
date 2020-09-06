@@ -11,14 +11,54 @@
 <body>
 
 <h3>Boids</h3>
-
-<canvas id="boidCanvas" width="500" height="500" style="border:1px solid #d3d3d3;"></canvas>
-
-<button onclick="flyBoid()">Start Flying</button>
-
-<div class="slidecontainer">
-  <input type="range" min="20" max="500" value="50" class="slider" id="numOfBoidsId">
-  <p>Value: <span id="numBoidsValue"></span></p>
+<div class="flex-container">
+    <div>
+      <canvas id="boidCanvas" width="500" height="500" style="border:1px solid #d3d3d3;"></canvas>
+      <button onclick="flyBoid()">Start Flying</button>
+      <button onclick="refreshConfig()">Refresh Flying Parameters</button>
+    </div>
+    <div id="box">
+      <div class="slidecontainer">
+        <input type="range" min="20" max="500" value="75" class="slider" id="numOfBoidsId">
+        <p>Number of boids: <span id="numBoidsValue"></span></p>
+      </div>
+      <div class="slidecontainer">
+        <input type="range" min="80" max="300" value="175" class="slider" id="cohesionRangeId">
+        <p>Cohesion range: <span id="cohesionRangeValue"></span></p>
+      </div>
+      <div class="slidecontainer">
+        <input type="range" min="10" max="50" value="20" class="slider" id="separationRangeId">
+        <p>Separation range: <span id="separationRangeValue"></span></p>
+      </div>
+      <div class="slidecontainer">
+        <input type="range" min="20" max="200" value="75" class="slider" id="alignmentRangeId">
+        <p>Alignment range: <span id="alignmentRangeValue"></span></p>
+      </div>
+      <div class="slidecontainer">
+        <input type="range" min="0.00" max="0.5" value="0.01" step="0.01" class="slider" id="cohesionFactorId">
+        <p>Cohesion factor: <span id="cohesionFactorValue"></span></p>
+      </div>
+      <div class="slidecontainer">
+        <input type="range" min="0.01" max="0.08" value="0.035" step="0.005" class="slider" id="separationFactorId">
+        <p>Separation factor: <span id="separationFactorValue"></span></p>
+      </div>
+      <div class="slidecontainer">
+        <input type="range" min="0.05" max="0.5" value="0.125" step="0.01" class="slider" id="alignmentFactorId">
+        <p>Alignment factor: <span id="alignmentFactorValue"></span></p>
+      </div>
+      <div class="slidecontainer">
+        <input type="range" min="5" max="20" value="12" class="slider" id="speedLimitId">
+        <p>Speed limit: <span id="speedLimitValue"></span></p>
+      </div>
+      <div class="slidecontainer">
+        <input type="range" min="5" max="50" value="30" class="slider" id="simulationSpeedId">
+        <p>Simulation speed: <span id="simulationSpeedValue"></span></p>
+      </div>
+      <div class="slidecontainer">
+        <input type="range" min="5" max="50" value="30" class="slider" id="initialMaxSpeedId">
+        <p>Initial max speed: <span id="initialMaxSpeedValue"></span></p>
+      </div>
+    </div>
 </div>
 
 <script src="js/app.js"></script>
