@@ -136,7 +136,8 @@ function drawEachBoid(ctx, boid) {
   ctx.translate(boid.x, boid.y);
   ctx.rotate(angle);
   ctx.translate(-boid.x, -boid.y);
-  ctx.fillStyle = "#558cf4";
+  // ctx.fillStyle = "#558cf4";
+  ctx.fillStyle = "#000011";
   ctx.beginPath();
   ctx.moveTo(boid.x, boid.y);
   ctx.lineTo(boid.x - 15, boid.y + 5);
@@ -185,8 +186,9 @@ function refreshConfig() {
 
 function flyBoid() {
   console.log('stop/start simulation');
+  var simulationType = document.getElementById("simulationMode").value;
   websocket.send(stopSimulation);
-  websocket.send(startSimulation);
+  websocket.send(startSimulation + ':' + simulationType);
 }
 
 function myFunction1() {

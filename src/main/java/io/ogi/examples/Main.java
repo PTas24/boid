@@ -3,7 +3,6 @@ package io.ogi.examples;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
 import java.util.logging.LogManager;
@@ -93,6 +92,7 @@ public final class Main {
         GreetService greetService = new GreetService(config);
         BoidSimulationConfig boidSimulationConfig = new BoidSimulationConfig(config);
         BoidSimulation boidSimulation = new BoidSimulation(boidSimulationConfig);
+        BoidSimulationReactive boidSimulationReactive = new BoidSimulationReactive(boidSimulationConfig);
         BoidService boidService = new BoidService(boidSimulationConfig);
 
         HealthSupport health = HealthSupport.builder()
@@ -111,7 +111,7 @@ public final class Main {
                                     @Override
                                     @SuppressWarnings("unchecked")
                                     public <T> T getEndpointInstance(Class<T> endpointClass) {
-                                        return (T) new BoidWebSocketEndpoint(boidSimulation);
+                                        return (T) new BoidWebSocketEndpoint(boidSimulation, boidSimulationReactive);
                                     }
                                 })
                                 .build()).build())

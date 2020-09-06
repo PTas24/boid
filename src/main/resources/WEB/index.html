@@ -16,6 +16,15 @@
       <canvas id="boidCanvas" width="500" height="500" style="border:1px solid #d3d3d3;"></canvas>
       <button onclick="flyBoid()">Start Flying</button>
       <button onclick="refreshConfig()">Refresh Flying Parameters</button>
+      <div>
+        <form>
+          Select implementation:
+          <select id="simulationMode">
+            <option value="sync">Sync</option>
+            <option value="reactive">Reactive</option>
+          </select>
+        </form>
+      </div>
     </div>
     <div id="box">
       <div class="slidecontainer">
