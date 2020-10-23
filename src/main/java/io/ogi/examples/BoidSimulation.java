@@ -91,9 +91,6 @@ public class BoidSimulation implements Runnable {
             movedBoid.setDy(BoidTransformation.limitSpeedDy(actualBoid, speed, boidModel.getSpeedLimit()));
         }
 
-//        movedBoid.setX((int)Math.round(movedBoid.getX() + movedBoid.getDx()));
-//        movedBoid.setY((int)Math.round(movedBoid.getY() + movedBoid.getDy()));
-
         keepWithinBounds(movedBoid);
 
         movedBoid.setX((int)Math.round(movedBoid.getX() + movedBoid.getDx()));
