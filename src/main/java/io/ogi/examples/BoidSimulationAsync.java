@@ -3,17 +3,13 @@ package io.ogi.examples;
 import io.ogi.examples.model.Boid;
 import io.ogi.examples.model.BoidModel;
 import io.ogi.examples.model.BoidPositions;
-import io.ogi.examples.model.BoidTempState;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import java.util.stream.DoubleStream;
 import java.util.stream.Stream;
 
 import static io.ogi.examples.BoidTransformation2.*;
@@ -23,7 +19,7 @@ public class BoidSimulationAsync implements Runnable {
 
     private static final Logger LOGGER = Logger.getLogger(BoidSimulationAsync.class.getName());
     private final MessageQueue messageQueue = MessageQueue.instance();
-    private BoidPositions boidPositions;
+    private final BoidPositions boidPositions;
     private final BoidSimulationConfig boidSimulationConfig;
     private BoidModel boidModel;
 
@@ -51,27 +47,31 @@ public class BoidSimulationAsync implements Runnable {
     @Override
     public void run() {
         try {
-            moveTheBoidAsync(new BoidTempState(boidPositions.getBoids()));
+            moveTheBoidAsync();
         } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
         }
         drawTheBoids();
     }
 
-    CompletableFuture<Boid> moveOneBoid(Boid boid, List<Boid> boids, BoidModel boidModel, BoidTempState boidTempState) {
+    CompletableFuture<Boid> moveOneBoid(Boid boid, List<Boid> boids, BoidModel boidModel) {
+        List<Boid> cohesionNeighbours = getNeighbors(boid, boids, boidModel.getCohesionRange());
+        List<Boid> separationNeighbours = getNeighbors(boid, boids, boidModel.getSeparationRange());
+        List<Boid> alignmentNeighbours = getNeighbors(boid, boids, boidModel.getAlignmentRange());
+        double centerX = getValue(cohesionNeighbours, cohesionNeighbours.stream().mapToDouble(Boid::getX));
+        double centerY = getValue(cohesionNeighbours, cohesionNeighbours.stream().mapToDouble(Boid::getY));
+        List<Integer> otherXPositions = separationNeighbours.stream().map(Boid::getX).collect(Collectors.toList());
+        List<Integer> otherYPositions = separationNeighbours.stream().map(Boid::getY).collect(Collectors.toList());
+        double averageXVelocity = getValue(alignmentNeighbours, alignmentNeighbours.stream().mapToDouble(Boid::getDx));
+        double averageYVelocity = getValue(alignmentNeighbours, alignmentNeighbours.stream().mapToDouble(Boid::getDy));
+
         return CompletableFuture.supplyAsync(() -> {
-                double velocityX1 = flyTowardsCenter(boid.getX(), boidTempState.getCenterX(), boidModel.getCohesionFactor());
-//                double velocityX1 = 0;
-                double velocityX2 = keepDistance(boid.getX(), boidTempState.getOtherXPositions(), boidModel.getSeparationFactor());
-//                double velocityX2 = 0;
-//                double velocityX3 = matchVelocity(boidTempState.getAverageXVelocity(), boidModel.getAlignmentFactor());
-                double velocityX3 = 0;
-                double velocityY1 = flyTowardsCenter(boid.getY(), boidTempState.getCenterY(), boidModel.getCohesionFactor());
-//                double velocityY1 = 0;
-                double velocityY2 = keepDistance(boid.getY(), boidTempState.getOtherYPositions(), boidModel.getSeparationFactor());
-//                double velocityY2 = 0;
-//                double velocityY3 = matchVelocity(boidTempState.getAverageYVelocity(), boidModel.getAlignmentFactor());
-                double velocityY3 = 0;
+                double velocityX1 = flyTowardsCenter(boid.getX(), centerX, boidModel.getCohesionFactor());
+                double velocityX2 = keepDistance(boid.getX(), otherXPositions, boidModel.getSeparationFactor());
+                double velocityX3 = matchVelocity(averageXVelocity, boidModel.getAlignmentFactor());
+                double velocityY1 = flyTowardsCenter(boid.getY(), centerY, boidModel.getCohesionFactor());
+                double velocityY2 = keepDistance(boid.getY(), otherYPositions, boidModel.getSeparationFactor());
+                double velocityY3 = matchVelocity(averageYVelocity, boidModel.getAlignmentFactor());
                 double xVelocity = boid.getDx() + velocityX1 + velocityX2 + velocityX3;
                 double yVelocity = boid.getDy() + velocityY1 + velocityY2 + velocityY3;
                 double speed = Math.sqrt(xVelocity * xVelocity + yVelocity * yVelocity);
@@ -86,9 +86,16 @@ public class BoidSimulationAsync implements Runnable {
             .exceptionally(ex -> new Boid(boid.getX(),boid.getY(), boid.getDx(), boid.getDy()));
     }
 
-    public void moveTheBoidAsync(BoidTempState boidTempState) throws InterruptedException, ExecutionException {
+    private double getValue(List<Boid> neighbours, DoubleStream doubleStream) {
+        if (neighbours.isEmpty()) {
+            return 0;
+        }
+        return doubleStream.sum() / neighbours.size();
+    }
+
+    public void moveTheBoidAsync() throws InterruptedException, ExecutionException {
         List<CompletableFuture<Boid>> newBoidFutures = boidPositions.getBoids().stream()
-                .map(boid -> moveOneBoid(boid, boidPositions.getBoids(), boidModel, boidTempState))
+                .map(boid -> moveOneBoid(boid, boidPositions.getBoids(), boidModel))
                 .collect(toList());
 
         CompletableFuture<Void> allFutures = CompletableFuture.allOf(
@@ -103,8 +110,5 @@ public class BoidSimulationAsync implements Runnable {
         );
 
         boidPositions.setBoids(allBoidFuture.get());
-        System.out.println("x: " + boidPositions.getBoids().get(0).getX());
-        System.out.println("y: " + boidPositions.getBoids().get(0).getY());
-
     }
 }
