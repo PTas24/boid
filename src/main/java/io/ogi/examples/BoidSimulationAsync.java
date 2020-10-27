@@ -7,6 +7,8 @@ import io.ogi.examples.model.BoidPositions;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.DoubleStream;
@@ -22,6 +24,7 @@ public class BoidSimulationAsync implements Runnable {
     private final BoidPositions boidPositions;
     private final BoidSimulationConfig boidSimulationConfig;
     private BoidModel boidModel;
+    private Executor executor;
 
     public BoidSimulationAsync(BoidSimulationConfig boidSimulationConfig) {
         this.boidSimulationConfig = boidSimulationConfig;
@@ -34,6 +37,11 @@ public class BoidSimulationAsync implements Runnable {
         boidModel = boidSimulationConfig.getBoidModel();
         LOGGER.info(() -> "model: " + boidModel);
         boidPositions.setBoids(Stream.generate(() -> new Boid(boidModel)).limit(boidModel.getNumOfBoids()).collect(toList()));
+        executor = Executors.newFixedThreadPool(Math.min(boidModel.getNumOfBoids(), 100), (Runnable r) -> {
+            Thread t = new Thread(r);
+            t.setDaemon(true);
+            return t;
+            });
     }
 
     public BoidModel getBoidModel() {
@@ -46,11 +54,7 @@ public class BoidSimulationAsync implements Runnable {
 
     @Override
     public void run() {
-        try {
-            moveTheBoidAsync();
-        } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
-        }
+        moveTheBoidAsync();
         drawTheBoids();
     }
 
@@ -82,7 +86,7 @@ public class BoidSimulationAsync implements Runnable {
                 xVelocity = keepWithinBounds(boid.getX(), xVelocity, boidModel.getCanvasMargin(), boidModel.getCanvasWidth(), boidModel.getSpeedAdjust());
                 yVelocity = keepWithinBounds(boid.getY(), yVelocity, boidModel.getCanvasMargin(), boidModel.getCanvasHeight(), boidModel.getSpeedAdjust());
                 return new Boid((int)Math.round(boid.getX() + xVelocity),(int)Math.round(boid.getY() + yVelocity), xVelocity, yVelocity);
-            })
+            }, executor)
             .exceptionally(ex -> new Boid(boid.getX(),boid.getY(), boid.getDx(), boid.getDy()));
     }
 
@@ -93,22 +97,12 @@ public class BoidSimulationAsync implements Runnable {
         return doubleStream.sum() / neighbours.size();
     }
 
-    public void moveTheBoidAsync() throws InterruptedException, ExecutionException {
+    public void moveTheBoidAsync() {
         List<CompletableFuture<Boid>> newBoidFutures = boidPositions.getBoids().stream()
                 .map(boid -> moveOneBoid(boid, boidPositions.getBoids(), boidModel))
                 .collect(toList());
 
-        CompletableFuture<Void> allFutures = CompletableFuture.allOf(
-                newBoidFutures.toArray(new CompletableFuture[newBoidFutures.size()])
-        );
-
-       // When all the Futures are completed, call `future.join()` to get their results and collect the results in a list -
-        CompletableFuture<List<Boid>> allBoidFuture = allFutures.thenApply(v ->
-            newBoidFutures.stream()
-                    .map(CompletableFuture::join)
-                    .collect(Collectors.toList())
-        );
-
-        boidPositions.setBoids(allBoidFuture.get());
+        List<Boid> newBoid = newBoidFutures.stream().map(CompletableFuture::join).collect(toList());
+        boidPositions.setBoids(newBoid);
     }
 }
