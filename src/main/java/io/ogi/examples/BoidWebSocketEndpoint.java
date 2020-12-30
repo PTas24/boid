@@ -4,15 +4,10 @@ import io.helidon.common.configurable.ScheduledThreadPoolSupplier;
 import io.helidon.common.configurable.ThreadPoolSupplier;
 
 import javax.websocket.*;
-import java.util.Map;
 import java.util.concurrent.*;
 import java.util.logging.Logger;
 
 public class BoidWebSocketEndpoint extends Endpoint {
-
-  public interface SimulationMode {
-    void applySimulation();
-  }
 
   private static final Logger LOGGER = Logger.getLogger(BoidWebSocketEndpoint.class.getName());
   private static final String START_SYNC = "start simulation:sync";
@@ -25,12 +20,6 @@ public class BoidWebSocketEndpoint extends Endpoint {
   private final BoidSimulation boidSimulation;
   private final BoidSimulationAsync boidSimulationAsync;
   private final BoidSimulationReactive boidSimulationReactive;
-  private final Map<String, SimulationMode> messageMap =
-      Map.of(
-          START_SYNC, this::syncronSimulation,
-          START_ASYNC, this::asyncronSimulation,
-          START_REACTIVE, this::reactiveSimulation,
-          STOP, this::stopSimulation);
 
   public BoidWebSocketEndpoint(BoidSimulationConfig boidSimulationConfig) {
     this.boidSimulation = new BoidSimulation(boidSimulationConfig);
@@ -64,7 +53,7 @@ public class BoidWebSocketEndpoint extends Endpoint {
               syncronSimulation();
               break;
             case START_ASYNC:
-              asyncronSimulation();
+              asyncSimulation();
               break;
             case START_REACTIVE:
               reactiveSimulation();
@@ -91,7 +80,7 @@ public class BoidWebSocketEndpoint extends Endpoint {
         TimeUnit.MILLISECONDS);
   }
 
-  private void asyncronSimulation() {
+  private void asyncSimulation() {
     LOGGER.info("start message async");
     boidSimulationAsync.initializeBoids();
     scheduledExecutorService.scheduleAtFixedRate(

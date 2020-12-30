@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 import java.util.stream.DoubleStream;
 import java.util.stream.Stream;
 
-import static io.ogi.examples.BoidTransformation2.*;
+import static io.ogi.examples.BoidTransformation.*;
 import static java.util.stream.Collectors.toList;
 
 public class BoidSimulationMPReactive implements Runnable {

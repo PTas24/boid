@@ -9,8 +9,8 @@ import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
 import java.util.stream.DoubleStream;
 
-import static io.ogi.examples.BoidTransformation2.*;
-import static io.ogi.examples.BoidTransformation2.keepWithinBounds;
+import static io.ogi.examples.BoidTransformation.*;
+import static io.ogi.examples.BoidTransformation.keepWithinBounds;
 
 public class BoidSimulationBase {
 
@@ -111,14 +111,14 @@ public class BoidSimulationBase {
       yVelocity = (boid.getDy() / speed) * boidModel.getSpeedLimit();
     }
     xVelocity =
-        BoidTransformation2.keepWithinBounds(
+        BoidTransformation.keepWithinBounds(
             boid.getX(),
             xVelocity,
             boidModel.getCanvasMargin(),
             boidModel.getCanvasWidth(),
             boidModel.getSpeedAdjust());
     yVelocity =
-        BoidTransformation2.keepWithinBounds(
+        BoidTransformation.keepWithinBounds(
             boid.getY(),
             yVelocity,
             boidModel.getCanvasMargin(),
