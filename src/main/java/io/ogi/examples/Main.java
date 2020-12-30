@@ -89,7 +89,6 @@ public final class Main {
                 Collections.singletonList(BoidPositionTextEncoder.class);
 
         MetricsSupport metrics = MetricsSupport.create();
-        GreetService greetService = new GreetService(config);
         BoidSimulationConfig boidSimulationConfig = new BoidSimulationConfig(config);
         BoidSimulation boidSimulation = new BoidSimulation(boidSimulationConfig);
         BoidSimulationAsync boidSimulationAsync = new BoidSimulationAsync(boidSimulationConfig);
@@ -102,7 +101,6 @@ public final class Main {
         return Routing.builder()
                 .register(health)                   // Health at "/health"
                 .register(metrics)                  // Metrics at "/metrics"
-                .register("/greet", greetService)
                 .register("/boid", boidService)
                 .register("/websocket", TyrusSupport.builder().register(
                         ServerEndpointConfig.Builder.create(BoidWebSocketEndpoint.class, "/boid-positions")
@@ -115,7 +113,6 @@ public final class Main {
                                     }
                                 })
                                 .build()).build())
-//                .register("/pictures", StaticContentSupport.create(Paths.get("/WEB/pics")))
                 .register("/", StaticContentSupport.builder("/WEB").welcomeFileName("index.html"))
                 .build();
     }

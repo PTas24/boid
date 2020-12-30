@@ -11,7 +11,11 @@ public class BoidPositions {
         boids = new ArrayList<>();
     }
 
-    public List<Boid> getBoids() {
+  public BoidPositions(List<Boid> boids) {
+    this.boids = boids;
+  }
+
+  public List<Boid> getBoids() {
         return boids;
     }
 
