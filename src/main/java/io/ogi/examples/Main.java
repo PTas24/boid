@@ -90,8 +90,8 @@ public final class Main {
 
         MetricsSupport metrics = MetricsSupport.create();
         BoidSimulationConfig boidSimulationConfig = new BoidSimulationConfig(config);
-        BoidSimulation boidSimulation = new BoidSimulation(boidSimulationConfig);
-        BoidSimulationAsync boidSimulationAsync = new BoidSimulationAsync(boidSimulationConfig);
+//        BoidSimulation boidSimulation = new BoidSimulation(boidSimulationConfig);
+//        BoidSimulationAsync boidSimulationAsync = new BoidSimulationAsync(boidSimulationConfig);
         BoidService boidService = new BoidService(boidSimulationConfig);
 
         HealthSupport health = HealthSupport.builder()
@@ -109,7 +109,8 @@ public final class Main {
                                     @Override
                                     @SuppressWarnings("unchecked")
                                     public <T> T getEndpointInstance(Class<T> endpointClass) {
-                                        return (T) new BoidWebSocketEndpoint(boidSimulation, boidSimulationAsync);
+                                        return (T) new BoidWebSocketEndpoint(boidSimulationConfig);
+//                                        return (T) new BoidWebSocketEndpoint(boidSimulation, boidSimulationAsync);
                                     }
                                 })
                                 .build()).build())
