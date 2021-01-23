@@ -7,8 +7,13 @@ import io.ogi.boid.simulation.BoidSimulation;
 import io.ogi.boid.simulation.BoidSimulationAsync;
 import io.ogi.boid.simulation.BoidSimulationReactive;
 
-import javax.websocket.*;
-import java.util.concurrent.*;
+import javax.websocket.CloseReason;
+import javax.websocket.Endpoint;
+import javax.websocket.EndpointConfig;
+import javax.websocket.Session;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 public class BoidWebSocketEndpoint extends Endpoint {
@@ -34,6 +39,7 @@ public class BoidWebSocketEndpoint extends Endpoint {
   @Override
   public void onOpen(Session session, EndpointConfig endpointConfig) {
     LOGGER.info("Opening session " + session.getId());
+    MessageQueueTaker messageQueueTaker = new MessageQueueTaker(session);
     executor =
         ThreadPoolSupplier.builder()
             .threadNamePrefix("boid-message-queue-taker-thread")
@@ -41,54 +47,83 @@ public class BoidWebSocketEndpoint extends Endpoint {
             .daemon(true)
             .build()
             .get();
-    scheduledExecutorService =
-        ScheduledThreadPoolSupplier.builder()
-            .threadNamePrefix("boid-simulation-async-thread")
-            .corePoolSize(1)
-            .daemon(true)
-            .build()
-            .get();
+    //    scheduledExecutorService =
+    //        ScheduledThreadPoolSupplier.builder()
+    //            .threadNamePrefix("boid-simulation-async-thread")
+    //            .corePoolSize(1)
+    //            .daemon(true)
+    //            .build()
+    //            .get();
 
     session.addMessageHandler(
         String.class,
         message -> {
           switch (message) {
             case START_SYNC:
+              LOGGER.info("start message sync");
               syncronSimulation();
               break;
             case START_ASYNC:
+              LOGGER.info("start message async");
               asyncSimulation();
               break;
             case START_REACTIVE:
-              reactiveSimulation();
+              LOGGER.info("start message reactive");
+              scheduledExecutorService =
+                  ScheduledThreadPoolSupplier.builder()
+                      .threadNamePrefix("boid-simulation-r-thread")
+                      .corePoolSize(1)
+                      .daemon(true)
+                      .build()
+                      .get();
+              boidSimulationReactive.initializeBoids();
+              boidSimulationReactive.initializeMessaging();
+              boidSimulationReactive.startSimReactive();
+              scheduledExecutorService.scheduleAtFixedRate(
+                  boidSimulationReactive::nextSimReactive,
+                  5,
+                  boidSimulationReactive.getBoidModel().getSimulationSpeed(),
+                  TimeUnit.MILLISECONDS);
+
+              //              reactiveSimulation();
               break;
             case STOP:
-              stopSimulation();
+              LOGGER.info("stop message");
+              scheduledExecutorService.shutdownNow();
               break;
             default:
               throw new IllegalStateException("Unexpected value: " + message);
           }
         });
 
-    MessageQueueTaker messageQueueTaker = new MessageQueueTaker(session);
     executor.execute(messageQueueTaker);
   }
 
   private void syncronSimulation() {
-    LOGGER.info("start message sync");
+    scheduledExecutorService = ScheduledThreadPoolSupplier.builder()
+        .threadNamePrefix("boid-simulation-s-thread")
+        .corePoolSize(1)
+        .daemon(true)
+        .build()
+        .get();
     boidSimulation.initializeBoids();
     scheduledExecutorService.scheduleAtFixedRate(
-        boidSimulation::startSim,
+        boidSimulation::startSimSync,
         5,
         boidSimulation.getBoidModel().getSimulationSpeed(),
         TimeUnit.MILLISECONDS);
   }
 
   private void asyncSimulation() {
-    LOGGER.info("start message async");
+    scheduledExecutorService = ScheduledThreadPoolSupplier.builder()
+        .threadNamePrefix("boid-simulation-a-thread")
+        .corePoolSize(1)
+        .daemon(true)
+        .build()
+        .get();
     boidSimulationAsync.initializeBoids();
     scheduledExecutorService.scheduleAtFixedRate(
-        boidSimulationAsync::startSim,
+        boidSimulationAsync::startSimAsync,
         5,
         boidSimulationAsync.getBoidModel().getSimulationSpeed(),
         TimeUnit.MILLISECONDS);
@@ -99,16 +134,12 @@ public class BoidWebSocketEndpoint extends Endpoint {
     boidSimulationReactive.initializeBoids();
     boidSimulationReactive.initializeMessaging();
     scheduledExecutorService.scheduleAtFixedRate(
-        boidSimulationReactive::startSim,
+        boidSimulationReactive::startSimReactive,
         5,
         boidSimulationReactive.getBoidModel().getSimulationSpeed(),
         TimeUnit.MILLISECONDS);
   }
 
-  private void stopSimulation() {
-    LOGGER.info("stop message");
-    scheduledExecutorService.shutdownNow();
-  }
 
   @Override
   public void onClose(final Session session, final CloseReason closeReason) {

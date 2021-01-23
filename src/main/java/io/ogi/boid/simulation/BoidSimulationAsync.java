@@ -54,7 +54,7 @@ public class BoidSimulationAsync {
     return boidModel;
   }
 
-  public void startSim() {
+  public void startSimAsync() {
     moveTheBoidAsync();
     drawTheBoids();
   }
@@ -70,6 +70,7 @@ public class BoidSimulationAsync {
   }
 
   private void drawTheBoids() {
+//    System.out.println("async draw");
     messageQueue.push(boidPositions);
   }
 

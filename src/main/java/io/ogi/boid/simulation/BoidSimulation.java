@@ -57,10 +57,11 @@ public class BoidSimulation {
   }
 
   private void drawTheBoids() {
+//    System.out.println("syncron draw");
     messageQueue.push(boidPositions);
   }
 
-  public void startSim() {
+  public void startSimSync() {
     moveTheBoids();
     drawTheBoids();
   }

@@ -1,6 +1,7 @@
 package io.ogi.boid.simulation;
 
 import io.helidon.messaging.Channel;
+import io.helidon.messaging.Emitter;
 import io.helidon.messaging.Messaging;
 import io.ogi.boid.MessageQueue;
 import io.ogi.boid.boidconfig.BoidSimulationConfig;
@@ -22,20 +23,23 @@ public class BoidSimulationReactive {
   private static final Logger LOGGER = Logger.getLogger(BoidSimulationReactive.class.getName());
   private final MessageQueue messageQueue = MessageQueue.instance();
   private final BoidPositions boidPositions;
+  private final BoidSimulationConfig boidSimulationConfig;
   private BoidModel boidModel;
   private Messaging moveBoidsMessaging;
   private Messaging drawMessaging;
   Channel<BoidAndNeighbours> moveBoidChannel;
   Channel<BoidPositions> drawBoidChannel;
   Channel<BoidPositions> nextMoveBoidChannel;
-  private final List<Boid> nextPositions;
+  private List<Boid> nextPositions;
   private final BoidMoves boidMoves = new BoidMoves();
+  Emitter<BoidAndNeighbours> myEmitter = Emitter.create(moveBoidChannel);
 
   public BoidSimulationReactive(BoidSimulationConfig boidSimulationConfig) {
     moveBoidChannel = Channel.create("moveBoidChannel");
     drawBoidChannel = Channel.create("drawBoidChannel");
     nextMoveBoidChannel = Channel.create("nextMoveBoidChannel");
 
+    this.boidSimulationConfig = boidSimulationConfig;
     this.boidPositions = new BoidPositions();
     this.boidModel = boidSimulationConfig.getBoidModel();
     this.nextPositions = new ArrayList<>();
@@ -45,17 +49,19 @@ public class BoidSimulationReactive {
   }
 
   public void initializeBoids() {
+    boidModel = boidSimulationConfig.getBoidModel();
     LOGGER.info(() -> "model: " + boidModel);
     boidPositions.setBoids(
         Stream.generate(() -> new Boid(boidModel))
             .limit(boidModel.getNumOfBoids())
             .collect(toList()));
+    nextPositions = boidPositions.getBoids();
   }
 
   public void initializeMessaging() {
-
     moveBoidsMessaging =
         Messaging.builder()
+//            .emitter(myEmitter)
             .publisher(
                 moveBoidChannel,
                 ReactiveStreams.fromIterable(boidPositions.getBoids())
@@ -84,10 +90,27 @@ public class BoidSimulationReactive {
             .build();
   }
 
-  public void startSim() {
+  public void startSimReactive() {
+    System.out.println("aaaaaa");
+    boidPositions.setBoids(nextPositions);
     moveBoidsMessaging.start();
     drawMessaging.start();
+//    moveBoidsMessaging.stop();
+//    drawMessaging.stop();
+//    boidPositions.setBoids(nextPositions);
+  }
+
+  public void nextSimReactive() {
+
+    nextPositions.forEach(nextBoid ->
+        myEmitter.send(new BoidAndNeighbours(nextBoid, nextPositions))
+    );
+//    moveBoidsMessaging.start();
+//    drawMessaging.start();
+//    moveBoidsMessaging.stop();
+//    drawMessaging.stop();
     boidPositions.setBoids(nextPositions);
+    System.out.println(boidPositions.getBoids().get(0));
   }
 
   public BoidModel getBoidModel() {

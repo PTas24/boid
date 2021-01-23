@@ -5,12 +5,9 @@ import io.ogi.boid.boidconfig.BoidSimulationConfig;
 import io.ogi.boid.model.Boid;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class BoidSimulationReactiveTest {
 
@@ -38,7 +35,7 @@ class BoidSimulationReactiveTest {
 
     boidSimulation.setBoidPositions(boids);
     boidSimulation.initializeMessaging();
-    boidSimulation.startSim();
+    boidSimulation.startSimReactive();
 
     List<Boid> expectedBoids =
         List.of(
