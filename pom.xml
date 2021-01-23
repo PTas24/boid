@@ -14,7 +14,7 @@
     <name>helidon-boid</name>
 
     <properties>
-        <mainClass>io.ogi.examples.Main</mainClass>
+        <mainClass>io.ogi.boid.Main</mainClass>
     </properties>
 
     <dependencies>
