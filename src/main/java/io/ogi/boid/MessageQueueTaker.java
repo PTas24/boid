@@ -21,8 +21,7 @@ public class MessageQueueTaker  implements Runnable {
         while(session.isOpen()) {
             if (!messageQueue.isEmpty()) {
                 try {
-//                    System.out.println(messageQueue.peek());
-
+      //              LOGGER.info("message: " + messageQueue.peek().toString());
                     session.getBasicRemote().sendObject(messageQueue.pop());
                 } catch (IOException | EncodeException | IllegalArgumentException e) {
                     LOGGER.log(Level.SEVERE, "Message sending failed", e);

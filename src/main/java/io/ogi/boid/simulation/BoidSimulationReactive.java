@@ -7,12 +7,10 @@ import io.ogi.boid.MessageQueue;
 import io.ogi.boid.boidconfig.BoidSimulationConfig;
 import io.ogi.boid.corealgorithm.BoidMoves;
 import io.ogi.boid.model.*;
-import org.eclipse.microprofile.reactive.messaging.Message;
-import org.eclipse.microprofile.reactive.streams.operators.ReactiveStreams;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Function;
+import java.util.concurrent.*;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
@@ -29,15 +27,26 @@ public class BoidSimulationReactive {
   private Messaging drawMessaging;
   Channel<BoidAndNeighbours> moveBoidChannel;
   Channel<BoidPositions> drawBoidChannel;
-  Channel<BoidPositions> nextMoveBoidChannel;
   private List<Boid> nextPositions;
   private final BoidMoves boidMoves = new BoidMoves();
-  Emitter<BoidAndNeighbours> myEmitter = Emitter.create(moveBoidChannel);
+
+  Channel<List<Boid>> channel0 = Channel.create("channel00");
+  Channel<List<BoidAndNeighbours>> channel01 = Channel.create("channel01");
+  Channel<List<Boid>> channel02 = Channel.create("channel02");
+  Channel<List<Boid>> channel05 = Channel.create("channel05");
+
+  Channel<List<Boid>> channel3 = Channel.create("channel3");
+
+  Emitter<List<Boid>> emitter = Emitter.<List<Boid>>builder()
+    .channel(channel0)
+    .channel(channel02)
+    .channel(channel05)
+    .channel(channel3)
+    .build();
 
   public BoidSimulationReactive(BoidSimulationConfig boidSimulationConfig) {
     moveBoidChannel = Channel.create("moveBoidChannel");
     drawBoidChannel = Channel.create("drawBoidChannel");
-    nextMoveBoidChannel = Channel.create("nextMoveBoidChannel");
 
     this.boidSimulationConfig = boidSimulationConfig;
     this.boidPositions = new BoidPositions();
@@ -45,7 +54,6 @@ public class BoidSimulationReactive {
     this.nextPositions = new ArrayList<>();
     boidModel = boidSimulationConfig.getBoidModel();
     initializeBoids();
-    initializeMessaging();
   }
 
   public void initializeBoids() {
@@ -55,62 +63,65 @@ public class BoidSimulationReactive {
         Stream.generate(() -> new Boid(boidModel))
             .limit(boidModel.getNumOfBoids())
             .collect(toList()));
-    nextPositions = boidPositions.getBoids();
   }
 
   public void initializeMessaging() {
     moveBoidsMessaging =
         Messaging.builder()
-//            .emitter(myEmitter)
-            .publisher(
-                moveBoidChannel,
-                ReactiveStreams.fromIterable(boidPositions.getBoids())
-                    .map(boid -> BoidAndNeighbours.of(boid, boidPositions.getBoids()))
-                    .map(BoidAndNeighboursMessage::new))
-            .subscriber(
-                moveBoidChannel,
-                ReactiveStreams.<Message<BoidAndNeighbours>>builder()
-                    .map(Message::getPayload)
-                    .map(
-                        boidAndNeighbours ->
-                            boidMoves.moveOneBoidSync(
-                                boidAndNeighbours.getCurrentBoid(),
-                                boidAndNeighbours.getBoids(),
-                                boidModel))
-                    .forEach(nextPositions::add))
+            .emitter(emitter)
+            .processor(
+                channel0,
+                channel01,
+                boids ->
+                    boids.stream()
+                        .map(boid -> BoidAndNeighbours.of(boid, boidPositions.getBoids()))
+                        .peek(b -> System.out.println("current: " + b.getCurrentBoid()))
+                        .collect(toList()))
+            .processor(
+                channel01,
+                channel02,
+                boidAndN ->
+                    boidAndN.stream()
+                        .map(
+                            boidAndNeighbours ->
+                                boidMoves.moveOneBoidSync(
+                                    boidAndNeighbours.getCurrentBoid(),
+                                    boidAndNeighbours.getBoids(),
+                                    boidModel))
+                        .peek(b -> System.out.println("current boid: " + b.getX()))
+                        .collect(toList()))
+            .listener(
+                channel05,
+                s ->
+                    s.stream()
+                        .limit(2)
+                        .forEach(b -> System.out.println("Intercepted message " + b)))
             .build();
 
     drawMessaging =
         Messaging.builder()
-            .publisher(
-                drawBoidChannel,
-                ReactiveStreams.of(new BoidPositions(nextPositions))
-                    .map((Function<BoidPositions, BoidMessage<BoidPositions>>) BoidMessage::new))
+            .emitter(emitter)
+            .processor(channel3, drawBoidChannel, BoidPositions::new)
             .listener(drawBoidChannel, messageQueue::push)
             .build();
   }
 
   public void startSimReactive() {
-    System.out.println("aaaaaa");
-    boidPositions.setBoids(nextPositions);
+    LOGGER.info("startSimReactive: " + boidPositions.getBoids().get(0));
     moveBoidsMessaging.start();
     drawMessaging.start();
-//    moveBoidsMessaging.stop();
-//    drawMessaging.stop();
-//    boidPositions.setBoids(nextPositions);
+    emitter.send(boidPositions.getBoids());
   }
 
   public void nextSimReactive() {
+    LOGGER.info("nextSimReactive before send: " + boidPositions.getBoids().get(0));
+    LOGGER.info("nextSimReactive before send: " + nextPositions.size());
+    emitter.send(nextPositions);
+    LOGGER.info("nextSimReactive after send: " + boidPositions.getBoids().get(0));
+  }
 
-    nextPositions.forEach(nextBoid ->
-        myEmitter.send(new BoidAndNeighbours(nextBoid, nextPositions))
-    );
-//    moveBoidsMessaging.start();
-//    drawMessaging.start();
-//    moveBoidsMessaging.stop();
-//    drawMessaging.stop();
-    boidPositions.setBoids(nextPositions);
-    System.out.println(boidPositions.getBoids().get(0));
+  public void stopSimReactive() {
+    moveBoidsMessaging.stop();
   }
 
   public BoidModel getBoidModel() {

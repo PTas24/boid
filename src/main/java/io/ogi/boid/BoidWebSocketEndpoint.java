@@ -5,7 +5,7 @@ import io.helidon.common.configurable.ThreadPoolSupplier;
 import io.ogi.boid.boidconfig.BoidSimulationConfig;
 import io.ogi.boid.simulation.BoidSimulation;
 import io.ogi.boid.simulation.BoidSimulationAsync;
-import io.ogi.boid.simulation.BoidSimulationReactive2;
+import io.ogi.boid.simulation.BoidSimulationReactive;
 
 import javax.websocket.CloseReason;
 import javax.websocket.Endpoint;
@@ -28,12 +28,12 @@ public class BoidWebSocketEndpoint extends Endpoint {
 
   private final BoidSimulation boidSimulation;
   private final BoidSimulationAsync boidSimulationAsync;
-  private final BoidSimulationReactive2 boidSimulationReactive;
+  private final BoidSimulationReactive boidSimulationReactive;
 
   public BoidWebSocketEndpoint(BoidSimulationConfig boidSimulationConfig) {
     this.boidSimulation = new BoidSimulation(boidSimulationConfig);
     this.boidSimulationAsync = new BoidSimulationAsync(boidSimulationConfig);
-    this.boidSimulationReactive = new BoidSimulationReactive2(boidSimulationConfig);
+    this.boidSimulationReactive = new BoidSimulationReactive(boidSimulationConfig);
   }
 
   @Override
@@ -47,13 +47,6 @@ public class BoidWebSocketEndpoint extends Endpoint {
             .daemon(true)
             .build()
             .get();
-    //    scheduledExecutorService =
-    //        ScheduledThreadPoolSupplier.builder()
-    //            .threadNamePrefix("boid-simulation-async-thread")
-    //            .corePoolSize(1)
-    //            .daemon(true)
-    //            .build()
-    //            .get();
 
     session.addMessageHandler(
         String.class,
@@ -68,24 +61,7 @@ public class BoidWebSocketEndpoint extends Endpoint {
               asyncSimulation();
               break;
             case START_REACTIVE:
-              LOGGER.info("start message reactive");
-              scheduledExecutorService =
-                  ScheduledThreadPoolSupplier.builder()
-                      .threadNamePrefix("boid-simulation-r-thread")
-                      .corePoolSize(1)
-                      .daemon(true)
-                      .build()
-                      .get();
-              boidSimulationReactive.initializeBoids();
-              boidSimulationReactive.initializeMessaging();
-
-              boidSimulationReactive.startSimReactive();
-              scheduledExecutorService.scheduleAtFixedRate(
-                  boidSimulationReactive::nextSimReactive,
-                  5,
-                  boidSimulationReactive.getBoidModel().getSimulationSpeed(),
-                  TimeUnit.MILLISECONDS);
-              //              reactiveSimulation();
+              reactiveSimulation();
               break;
             case STOP:
               LOGGER.info("stop message");
@@ -131,8 +107,16 @@ public class BoidWebSocketEndpoint extends Endpoint {
 
   private void reactiveSimulation() {
     LOGGER.info("start message reactive");
+    scheduledExecutorService =
+        ScheduledThreadPoolSupplier.builder()
+            .threadNamePrefix("boid-simulation-r-thread")
+            .corePoolSize(1)
+            .daemon(true)
+            .build()
+            .get();
     boidSimulationReactive.initializeBoids();
     boidSimulationReactive.initializeMessaging();
+    boidSimulationReactive.startSimReactive();
     scheduledExecutorService.scheduleAtFixedRate(
         boidSimulationReactive::startSimReactive,
         5,

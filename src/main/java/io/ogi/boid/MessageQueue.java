@@ -21,16 +21,13 @@ public class MessageQueue {
         queue.add(s);
     }
 
-
     public BoidPositions pop() {
-//        System.out.println(queue.peek());
         return queue.poll();
     }
 
     public boolean isEmpty() {
         return queue.isEmpty();
     }
-
 
     public BoidPositions peek() {
         return queue.peek();

@@ -70,7 +70,6 @@ public class BoidSimulationAsync {
   }
 
   private void drawTheBoids() {
-//    System.out.println("async draw");
     messageQueue.push(boidPositions);
   }
 

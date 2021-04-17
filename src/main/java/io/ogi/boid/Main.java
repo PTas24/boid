@@ -23,31 +23,14 @@ import io.ogi.boid.encoder.BoidPositionTextEncoder;
 import javax.websocket.Encoder;
 import javax.websocket.server.ServerEndpointConfig;
 
-/**
- * The application main class.
- */
 public final class Main {
 
-    /**
-     * Cannot be instantiated.
-     */
-    private Main() {
-    }
+    private Main() { }
 
-    /**
-     * Application main entry point.
-     * @param args command line arguments.
-     * @throws IOException if there are problems reading logging properties
-     */
     public static void main(final String[] args) throws IOException {
         startServer();
     }
 
-    /**
-     * Start the server.
-     * @return the created {@link WebServer} instance
-     * @throws IOException if there are problems reading logging properties
-     */
     static WebServer startServer() throws IOException {
         setupLogging();
 
@@ -73,7 +56,6 @@ public final class Main {
                     t.printStackTrace(System.err);
                     return null;
                 });
-
         return server;
     }
 
@@ -84,15 +66,17 @@ public final class Main {
         MetricsSupport metrics = MetricsSupport.create();
         BoidSimulationConfig boidSimulationConfig = new BoidSimulationConfig(config);
         BoidService boidService = new BoidService(boidSimulationConfig);
+        GreetService greetService = new GreetService(config);
 
         HealthSupport health = HealthSupport.builder()
-                .addLiveness(HealthChecks.healthChecks())   // Adds a convenient set of checks
+                .addLiveness(HealthChecks.healthChecks())
                 .build();
 
         return Routing.builder()
                 .register(health)                   // Health at "/health"
                 .register(metrics)                  // Metrics at "/metrics"
                 .register("/boid", boidService)
+                .register("/greet", greetService)
                 .register("/websocket", TyrusSupport.builder().register(
                         ServerEndpointConfig.Builder.create(BoidWebSocketEndpoint.class, "/boid-positions")
                                 .encoders(encoders)
