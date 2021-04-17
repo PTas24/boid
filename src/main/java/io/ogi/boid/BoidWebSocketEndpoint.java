@@ -5,7 +5,7 @@ import io.helidon.common.configurable.ThreadPoolSupplier;
 import io.ogi.boid.boidconfig.BoidSimulationConfig;
 import io.ogi.boid.simulation.BoidSimulation;
 import io.ogi.boid.simulation.BoidSimulationAsync;
-import io.ogi.boid.simulation.BoidSimulationReactive;
+import io.ogi.boid.simulation.BoidSimulationReactive2;
 
 import javax.websocket.CloseReason;
 import javax.websocket.Endpoint;
@@ -28,12 +28,12 @@ public class BoidWebSocketEndpoint extends Endpoint {
 
   private final BoidSimulation boidSimulation;
   private final BoidSimulationAsync boidSimulationAsync;
-  private final BoidSimulationReactive boidSimulationReactive;
+  private final BoidSimulationReactive2 boidSimulationReactive;
 
   public BoidWebSocketEndpoint(BoidSimulationConfig boidSimulationConfig) {
     this.boidSimulation = new BoidSimulation(boidSimulationConfig);
     this.boidSimulationAsync = new BoidSimulationAsync(boidSimulationConfig);
-    this.boidSimulationReactive = new BoidSimulationReactive(boidSimulationConfig);
+    this.boidSimulationReactive = new BoidSimulationReactive2(boidSimulationConfig);
   }
 
   @Override
@@ -78,13 +78,13 @@ public class BoidWebSocketEndpoint extends Endpoint {
                       .get();
               boidSimulationReactive.initializeBoids();
               boidSimulationReactive.initializeMessaging();
+
               boidSimulationReactive.startSimReactive();
               scheduledExecutorService.scheduleAtFixedRate(
                   boidSimulationReactive::nextSimReactive,
                   5,
                   boidSimulationReactive.getBoidModel().getSimulationSpeed(),
                   TimeUnit.MILLISECONDS);
-
               //              reactiveSimulation();
               break;
             case STOP:
